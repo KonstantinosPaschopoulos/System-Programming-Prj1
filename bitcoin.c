@@ -53,7 +53,13 @@ int main(int argc, char **argv){
     }
     else if (strcmp(argv[i], "-t") == 0)
     {
-
+      transactionsFile = fopen(argv[i + 1], "r");
+      if (transactionsFile == NULL)
+      {
+        perror("Could not open the transactions file");
+        exit(0);
+      }
+      i++;
     }
     else
     {
@@ -82,7 +88,12 @@ int main(int argc, char **argv){
   walletList->nodes = NULL;
 
   //Parsing the balances file
-  readBalances(bitCoinBalancesFile, bitcoinList, bitCoinValue);
+  readBalances(bitCoinBalancesFile, bitcoinList, walletList, bitCoinValue);
+
+
+
+
+
 
   return 0;
 }

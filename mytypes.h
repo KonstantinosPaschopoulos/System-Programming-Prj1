@@ -13,9 +13,14 @@ typedef struct List{
 
 typedef struct wallet_node{
   char walletID[50];
-  bitcoin_node *bitcoins; //A list of every bitcoin that the user owns
+  struct leaf *bitcoins; //A list of every bitcoin that the user owns
   struct wallet_node *next;
 } wallet_node;
+
+typedef struct leaf{
+  struct tree_node *bitcoin;
+  struct leaf *next;
+} leaf;
 
 typedef struct wallet{
     wallet_node *nodes;

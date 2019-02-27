@@ -40,7 +40,7 @@ void readBalances(FILE *bitCoinBalancesFile, List *bitcoinList){
 }
 
 void enterBitcoin(int id, List *bitcoinList){
-  Node *curr = bitcoinList->nodes;
+  bitcoin_node *curr = bitcoinList->nodes;
 
   //Checking if the bitCoinId already exists
   while (curr != NULL)
@@ -54,7 +54,7 @@ void enterBitcoin(int id, List *bitcoinList){
     curr = curr->next;
   }
 
-  Node *newBTC = (Node*)malloc(sizeof(Node));
+  bitcoin_node *newBTC = (bitcoin_node*)malloc(sizeof(bitcoin_node));
   if (newBTC == NULL)
   {
     perror("Malloc failed");

@@ -3,18 +3,29 @@
 
 typedef struct bitcoin_node{
   int bitCoinID;
-  //pointer to bitcoin tree
+  struct tree_node *tree;  //A pointer to the bitcoin's tree
   struct bitcoin_node *next;
 } bitcoin_node;
-
-typedef struct Wallet_node{
-  char userID[50];
-  //pointer to bitcoins in bitcoin list
-  struct Wallet_node *next;
-} Wallet_node;
 
 typedef struct List{
   bitcoin_node *nodes;
 } List;
+
+typedef struct wallet_node{
+  char walletID[50];
+  bitcoin_node *bitcoins; //A list of every bitcoin that the user owns
+  struct wallet_node *next;
+} wallet_node;
+
+typedef struct wallet{
+    wallet_node *nodes;
+} wallet;
+
+typedef struct tree_node{
+  char walletID[50];
+  int value;
+  struct tree_node *left;
+  struct tree_node *right;
+} tree_node;
 
 #endif

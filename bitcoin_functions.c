@@ -4,9 +4,10 @@
 #include "mytypes.h"
 #include "bitcoin_functions.h"
 
-void readBalances(FILE *bitCoinBalancesFile, List *bitcoinList){
+void readBalances(FILE *bitCoinBalancesFile, List *bitcoinList, int bitCoinValue){
   int name;
   char whole_line[250];
+  char walletID[50];
   char * pch;
 
   //Using fgets to read from the input until I reach the end of the file
@@ -27,19 +28,22 @@ void readBalances(FILE *bitCoinBalancesFile, List *bitcoinList){
       {
         //Storing the userID
         name = 1;
+        strcpy(walletID, pch);
       }
       else
       {
         //Storing the bitcoin
-        enterBitcoin(atoi(pch), bitcoinList);
+        enterBitcoin(atoi(pch), bitcoinList, bitCoinValue, walletID);
       }
 
       pch = strtok(NULL, " ");
     }
   }
+
+  fclose(bitCoinBalancesFile);
 }
 
-void enterBitcoin(int id, List *bitcoinList){
+void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, char *walletID){
   bitcoin_node *curr = bitcoinList->nodes;
 
   //Checking if the bitCoinId already exists
@@ -61,9 +65,21 @@ void enterBitcoin(int id, List *bitcoinList){
     exit(0);
   }
 
-  //--Create the tree
+  //Creating the tree
+  tree_node *root = (tree_node*)malloc(sizeof(tree_node));
+  if (root == NULL)
+  {
+    perror("Malloc failed");
+    exit(0);
+  }
+  root->value = bitCoinValue;
+  strcpy(root->walletID, walletID);
+
   newBTC->bitCoinID = id;
-  //--Add pointer to the tree
+  newBTC->next = NULL;
+
+  //Adding a pointer to the tree
+  newBTC->tree = root;
 
   //After I made sure the bitCoin is unique
   //I enter it in the main memory

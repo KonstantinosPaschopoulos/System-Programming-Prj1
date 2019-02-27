@@ -156,7 +156,8 @@ void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletLis
         perror("Malloc failed");
         exit(0);
       }
-      new_leaf->bitcoin = root;
+      new_leaf->bitcoin = newBTC;
+      new_leaf->balance = root;
       new_leaf->next = NULL;
 
       if (curr_wall->bitcoins == NULL)

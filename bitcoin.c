@@ -90,10 +90,22 @@ int main(int argc, char **argv){
   //Parsing the balances file
   readBalances(bitCoinBalancesFile, bitcoinList, walletList, bitCoinValue);
 
+  wallet_node *test = walletList->nodes;
+  leaf *test_b;
+  while (test != NULL)
+  {
+    printf("%s", test->walletID);
+    test_b = test->bitcoins;
+    while (test_b != NULL)
+    {
+      printf(" %d(%d) ", test_b->bitcoin->bitCoinID, test_b->balance->value);
+      test_b = test_b->next;
+    }
 
+    printf("\n");
 
-
-
+    test = test->next;
+  }
 
   return 0;
 }

@@ -18,7 +18,8 @@ typedef struct wallet_node{
 } wallet_node;
 
 typedef struct leaf{
-  struct tree_node *bitcoin;
+  struct bitcoin_node *bitcoin;
+  struct tree_node *balance;
   struct leaf *next;
 } leaf;
 

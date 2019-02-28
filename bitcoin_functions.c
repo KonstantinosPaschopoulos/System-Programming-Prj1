@@ -19,6 +19,7 @@ void readBalances(FILE *bitCoinBalancesFile, List *bitcoinList, wallet *walletLi
     {
       whole_line[strlen(whole_line) - 1] = '\0';
     }
+
     name = 0;
 
     //Using strtok to extract the userID and every
@@ -178,4 +179,62 @@ void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletLis
 
     curr_wall = curr_wall->next;
   }
+}
+
+bucket** hash_init(int num_entries){
+  int i;
+
+  bucket **hash_table = malloc(num_entries * sizeof(bucket*));
+  if (hash_table == NULL)
+  {
+    perror("Malloc failed");
+    exit(0);
+  }
+
+  for (i = 0; i < num_entries; i++)
+  {
+    hash_table[i] = NULL;
+  }
+
+  return hash_table;
+}
+
+void readTransactions(FILE *transactionsFile, wallet *walletList, bucket **senderHashtable, bucket **receiverHashtable){
+  char whole_line[250];
+  int transactionID, value;
+  char senderWalletID[50], receiverWalletID[50];
+
+  //Using fgets to read from the input until I reach the end of the file
+  while (fgets(whole_line, 250, transactionsFile))
+  {
+    if ((strlen(whole_line) > 0) && (whole_line[strlen(whole_line) - 1] == '\n'))
+    {
+      whole_line[strlen(whole_line) - 1] = '\0';
+    }
+
+
+  }
+}
+
+int hash_function(char *id, int num_entries){
+  int i, value = 0;
+
+  //The hash function works by adding the ASCII values of each character
+  for (i = 0; i < strlen(id); i++)
+  {
+    value += (int)id[i];
+  }
+
+  return (value % num_entries);
+}
+
+int bucket_hash(char *id, int bucketSize){
+  int i, value = 0;
+
+  for (i = 0; i < strlen(id); i++)
+  {
+    value += (int)id[i];
+  }
+
+  return (value % ((bucketSize - sizeof(bucket)) / sizeof(bucket_cell)));
 }

@@ -5,7 +5,7 @@
 #include "bitcoin_functions.h"
 
 int main(int argc, char **argv){
-  int i, bitCoinValue, senderHashtable1NumOfEntries, receiverHashtable1NumOfEntries, bucketSize;
+  int i, bitCoinValue, senderHashtableNumOfEntries, receiverHashtableNumOfEntries, bucketSize;
   List *bitcoinList;
   wallet *walletList;
   FILE *bitCoinBalancesFile = NULL;
@@ -27,12 +27,12 @@ int main(int argc, char **argv){
     }
     else if (strcmp(argv[i], "-h1") == 0)
     {
-      senderHashtable1NumOfEntries = atoi(argv[i + 1]);
+      senderHashtableNumOfEntries = atoi(argv[i + 1]);
       i++;
     }
     else if (strcmp(argv[i], "-h2") == 0)
     {
-      receiverHashtable1NumOfEntries = atoi(argv[i + 1]);
+      receiverHashtableNumOfEntries = atoi(argv[i + 1]);
       i++;
     }
     else if (strcmp(argv[i], "-b") == 0)
@@ -53,6 +53,7 @@ int main(int argc, char **argv){
     }
     else if (strcmp(argv[i], "-t") == 0)
     {
+      //Opening the transactions file
       transactionsFile = fopen(argv[i + 1], "r");
       if (transactionsFile == NULL)
       {
@@ -90,6 +91,14 @@ int main(int argc, char **argv){
   //Parsing the balances file
   readBalances(bitCoinBalancesFile, bitcoinList, walletList, bitCoinValue);
 
+  //After the balances have been read
+  //it's time to parse the transactions file
+  bucket **senderHashtable = hash_init(senderHashtableNumOfEntries);
+  bucket **receiverHashtable = hash_init(receiverHashtableNumOfEntries);
+
+  readTransactions(transactionsFile, walletList, senderHashtable, receiverHashtable);
+
+  /*
   wallet_node *test = walletList->nodes;
   leaf *test_b;
   while (test != NULL)
@@ -106,6 +115,7 @@ int main(int argc, char **argv){
 
     test = test->next;
   }
+  */
 
   return 0;
 }

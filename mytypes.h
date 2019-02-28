@@ -34,4 +34,20 @@ typedef struct tree_node{
   struct tree_node *right;
 } tree_node;
 
+typedef struct bucket{
+  struct bucket_cell *cells;//An array of walletIDs that point to different transactions
+  struct bucket *next; //In case of overflow
+} bucket;
+
+typedef struct bucket_cell{
+  char walletID[50];
+  struct transaction *transactions;
+} bucket_cell;
+
+typedef struct transaction{
+  struct tree_node *tree;
+  struct transaction *next;
+  struct transaction *remainder;  //In case more than two bitocins are needed for the same transaction
+} transaction;
+
 #endif

@@ -200,9 +200,11 @@ bucket** hash_init(int num_entries){
 }
 
 void readTransactions(FILE *transactionsFile, wallet *walletList, bucket **senderHashtable, bucket **receiverHashtable){
-  char whole_line[250];
-  int transactionID, value;
-  char senderWalletID[50], receiverWalletID[50];
+  int transactionID, value, day, month, year, hours, minutes, i;
+  char whole_line[250], senderWalletID[50], receiverWalletID[50];
+  char array[9][55];
+  char* token;
+  char delimiters[] = " -:";
 
   //Using fgets to read from the input until I reach the end of the file
   while (fgets(whole_line, 250, transactionsFile))
@@ -212,6 +214,24 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, bucket **sende
       whole_line[strlen(whole_line) - 1] = '\0';
     }
 
+    //Using strtok to tokenize every line before the final extraction
+    for (token = strtok(whole_line, delimiters), i = 0; token; token = strtok(NULL, delimiters), i++)
+    {
+      strcpy(array[i], token);
+    }
+
+    //Assigning the correct value to each variable
+    transactionID = atoi(array[0]);
+    strcpy(senderWalletID, array[1]);
+    strcpy(receiverWalletID, array[2]);
+    value = atoi(array[3]);
+    day = atoi(array[4]);
+    month = atoi(array[5]);
+    year = atoi(array[6]);
+    hours = atoi(array[7]);
+    minutes = atoi(array[8]);
+
+    printf("%d\n", value);
 
   }
 }

@@ -28,16 +28,34 @@ int main(int argc, char **argv){
     else if (strcmp(argv[i], "-h1") == 0)
     {
       senderHashtableNumOfEntries = atoi(argv[i + 1]);
+      if (senderHashtableNumOfEntries < 1)
+      {
+        printf("senderHashtableNumOfEntries should be a positive number\n");
+        exit(2);
+      }
+
       i++;
     }
     else if (strcmp(argv[i], "-h2") == 0)
     {
       receiverHashtableNumOfEntries = atoi(argv[i + 1]);
+      if (receiverHashtableNumOfEntries < 1)
+      {
+        printf("receiverHashtableNumOfEntries should be a positive number\n");
+        exit(2);
+      }
+
       i++;
     }
     else if (strcmp(argv[i], "-b") == 0)
     {
       bucketSize = atoi(argv[i + 1]);
+      if (bucketSize < sizeof(bucket))
+      {
+        printf("bucketSize should be more than %lu bytes\n", sizeof(bucket));
+        exit(2);
+      }
+
       i++;
     }
     else if (strcmp(argv[i], "-a") == 0)
@@ -93,8 +111,8 @@ int main(int argc, char **argv){
 
   //After the balances have been read
   //it's time to parse the transactions file
-  bucket **senderHashtable = hash_init(senderHashtableNumOfEntries);
-  bucket **receiverHashtable = hash_init(receiverHashtableNumOfEntries);
+  table *senderHashtable = hash_init(senderHashtableNumOfEntries);
+  table *receiverHashtable = hash_init(receiverHashtableNumOfEntries);
 
   readTransactions(transactionsFile, walletList, senderHashtable, receiverHashtable);
 

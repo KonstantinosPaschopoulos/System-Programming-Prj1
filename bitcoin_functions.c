@@ -181,11 +181,20 @@ void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletLis
   }
 }
 
-bucket** hash_init(int num_entries){
+table* hash_init(int num_entries){
   int i;
 
-  bucket **hash_table = malloc(num_entries * sizeof(bucket*));
+  table *hash_table = malloc(sizeof(table));
   if (hash_table == NULL)
+  {
+    perror("Malloc failed");
+    exit(0);
+  }
+
+  hash_table->size = num_entries;
+
+  hash_table->h_table = malloc(num_entries * sizeof(bucket*));
+  if (hash_table->h_table == NULL)
   {
     perror("Malloc failed");
     exit(0);
@@ -193,15 +202,15 @@ bucket** hash_init(int num_entries){
 
   for (i = 0; i < num_entries; i++)
   {
-    hash_table[i] = NULL;
+    hash_table->h_table[i] = NULL;
   }
 
   return hash_table;
 }
 
-void readTransactions(FILE *transactionsFile, wallet *walletList, bucket **senderHashtable, bucket **receiverHashtable){
-  int transactionID, value, day, month, year, hours, minutes, i;
-  char whole_line[250], senderWalletID[50], receiverWalletID[50];
+void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHashtable, table *receiverHashtable){
+  int value, day, month, year, hours, minutes, i;
+  char whole_line[250], senderWalletID[50], receiverWalletID[50], transactionID[50];
   char array[9][55];
   char* token;
   char delimiters[] = " -:";
@@ -221,7 +230,7 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, bucket **sende
     }
 
     //Assigning the correct value to each variable
-    transactionID = atoi(array[0]);
+    strcpy(transactionID, array[0]);
     strcpy(senderWalletID, array[1]);
     strcpy(receiverWalletID, array[2]);
     value = atoi(array[3]);
@@ -231,12 +240,14 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, bucket **sende
     hours = atoi(array[7]);
     minutes = atoi(array[8]);
 
-    printf("%d\n", value);
+    //delete this
+    minutes = minutes * hours * year * month * day;
 
+    printf("%d\n", value);
   }
 }
 
-int hash_function(char *id, int num_entries){
+int hash_function(char *id, table *hash_table){
   int i, value = 0;
 
   //The hash function works by adding the ASCII values of each character
@@ -245,7 +256,7 @@ int hash_function(char *id, int num_entries){
     value += (int)id[i];
   }
 
-  return (value % num_entries);
+  return (value % hash_table->size);
 }
 
 int bucket_hash(char *id, int bucketSize){

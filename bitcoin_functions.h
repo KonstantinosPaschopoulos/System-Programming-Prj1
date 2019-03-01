@@ -3,7 +3,7 @@
 
 void readBalances(FILE *, List *, wallet *, int);
 void enterBitcoin(int, List *, int, wallet *, char*);
-bucket** hash_init(int);
-void readTransactions(FILE *, wallet *, bucket **, bucket **);
-int hash_function(char *, int);
+table* hash_init(int);
+void readTransactions(FILE *, wallet *, table *, table *);
+int hash_function(char *, table *);
 int bucket_hash(char *, int);

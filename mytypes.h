@@ -35,6 +35,7 @@ typedef struct tree_node{
 } tree_node;
 
 typedef struct bucket{
+  int size;
   struct bucket_cell *cells;//An array of walletIDs that point to different transactions
   struct bucket *next; //In case of overflow
 } bucket;
@@ -44,7 +45,13 @@ typedef struct bucket_cell{
   struct transaction *transactions;
 } bucket_cell;
 
+typedef struct table {
+  int size;
+  bucket **h_table;
+} table;
+
 typedef struct transaction{
+  int day, month, year, hours, minutes;
   struct tree_node *tree;
   struct transaction *next;
   struct transaction *remainder;  //In case more than two bitocins are needed for the same transaction

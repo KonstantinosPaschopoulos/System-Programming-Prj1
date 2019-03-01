@@ -12,7 +12,7 @@ int main(int argc, char **argv){
   FILE *transactionsFile = NULL;
 
   //Checking the user input
-  if (argc > 13)
+  if (argc != 13)
   {
     printf("Wrong arguments\n");
     exit(2);
@@ -109,12 +109,11 @@ int main(int argc, char **argv){
   //Parsing the balances file
   readBalances(bitCoinBalancesFile, bitcoinList, walletList, bitCoinValue);
 
-  //After the balances have been read
-  //it's time to parse the transactions file
+  //After the balances have been read it's time to parse the transactions file
   table *senderHashtable = hash_init(senderHashtableNumOfEntries);
   table *receiverHashtable = hash_init(receiverHashtableNumOfEntries);
 
-  readTransactions(transactionsFile, walletList, senderHashtable, receiverHashtable);
+  readTransactions(transactionsFile, walletList, senderHashtable, receiverHashtable, bucketSize);
 
   /*
   wallet_node *test = walletList->nodes;

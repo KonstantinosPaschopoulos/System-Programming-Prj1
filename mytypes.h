@@ -36,11 +36,12 @@ typedef struct tree_node{
 
 typedef struct bucket{
   int size;
-  struct bucket_cell *cells;//An array of walletIDs that point to different transactions
+  struct bucket_cell *entries;//An array of walletIDs that point to different transactions
   struct bucket *next; //In case of overflow
 } bucket;
 
 typedef struct bucket_cell{
+  int empty;
   char walletID[50];
   struct transaction *transactions;
 } bucket_cell;
@@ -51,6 +52,7 @@ typedef struct table {
 } table;
 
 typedef struct transaction{
+  char transactionID[50];
   int day, month, year, hours, minutes;
   struct tree_node *tree;
   struct transaction *next;

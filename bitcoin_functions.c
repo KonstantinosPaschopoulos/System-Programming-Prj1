@@ -208,7 +208,7 @@ table* hash_init(int num_entries){
   return hash_table;
 }
 
-void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHashtable, table *receiverHashtable){
+void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHashtable, table *receiverHashtable, int bucketSize){
   int value, day, month, year, hours, minutes, i;
   char whole_line[250], senderWalletID[50], receiverWalletID[50], transactionID[50];
   char array[9][55];
@@ -240,10 +240,22 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
     hours = atoi(array[7]);
     minutes = atoi(array[8]);
 
-    //delete this
-    minutes = minutes * hours * year * month * day;
+    //Checking if the transaction is valid
+    if (strcmp(senderWalletID, receiverWalletID) == 0)
+    {
+      printf("Invalid transaction. The senderWalletID and receiverWalletID can't be the same.\n");
+      continue;
+    }
+    // if (checkBalance(senderWalletID, value, walletList) != 0)
+    // {
+    //   printf("Invalid transaction. The sender doesn't have enough money in it's wallet.\n");
+    //   continue;
+    // }
 
-    printf("%d\n", value);
+    //delete this
+    minutes = minutes * hours * year * month * day * value;
+
+    enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, bucketSize);
   }
 }
 
@@ -257,6 +269,69 @@ int hash_function(char *id, table *hash_table){
   }
 
   return (value % hash_table->size);
+}
+
+void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, int bucketSize){
+  int buc, i;
+  bucket *b;
+
+
+  //Updating the senderHashtable first
+  buc = hash_function(senderWalletID, senderHashtable);
+
+  if (senderHashtable->h_table[buc] == NULL)
+  {
+    //The bucket needs to be allocated before inserting the ID
+    b = malloc(sizeof(bucket));
+    if (b == NULL)
+    {
+      perror("Malloc failed");
+      exit(0);
+    }
+
+    b->entries = malloc(((bucketSize - sizeof(bucket)) / sizeof(bucket_cell)) * sizeof(bucket_cell));
+    if (b->entries == NULL)
+    {
+      perror("Malloc failed");
+      exit(0);
+    }
+
+    b->size = (bucketSize - sizeof(bucket)) / sizeof(bucket_cell);  //Number of entries in every bucket
+
+    for (i = 0; i < b->size; i++)
+    {
+      b->entries[i].empty = 1;
+    }
+
+    //Entering the walletID in the first cell
+    b->entries[0].empty = 0;
+    strcpy(b->entries[0].walletID, senderWalletID);
+
+    //Adding the transaction info
+
+
+    //Finaly updating the hash table
+    senderHashtable->h_table[buc] = b;
+  }
+  else
+  {
+    //The bucket exists and I need to find an empty space
+    b = senderHashtable->h_table[buc];
+
+    //Try to find the walletID
+    //if it doesnt exist add it and add the transaction
+    //if it does add the transaction
+
+    for (i = 0; i < b->size; i++)
+    {
+      if (b->entries[i].empty == 1)
+      {
+        //Adding the
+
+        break;
+      }
+    }
+  }
 }
 
 int bucket_hash(char *id, int bucketSize){

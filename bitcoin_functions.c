@@ -259,7 +259,7 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
   }
 }
 
-int hash_function(char *id, table *hash_table){
+int hash_function(char *id, int range){
   int i, value = 0;
 
   //The hash function works by adding the ASCII values of each character
@@ -268,20 +268,19 @@ int hash_function(char *id, table *hash_table){
     value += (int)id[i];
   }
 
-  return (value % hash_table->size);
+  return (value % range);
 }
 
 void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, int bucketSize){
-  int buc, i;
-  bucket *b;
-
+  int buc, i, flag;
+  bucket *b, *prev;
 
   //Updating the senderHashtable first
-  buc = hash_function(senderWalletID, senderHashtable);
+  buc = hash_function(senderWalletID, senderHashtable->size);
 
   if (senderHashtable->h_table[buc] == NULL)
   {
-    //The bucket needs to be allocated before inserting the ID
+    //The bucket needs to be allocated first
     b = malloc(sizeof(bucket));
     if (b == NULL)
     {
@@ -318,29 +317,43 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     //The bucket exists and I need to find an empty space
     b = senderHashtable->h_table[buc];
 
-    //Try to find the walletID
-    //if it doesnt exist add it and add the transaction
-    //if it does add the transaction
-
-    for (i = 0; i < b->size; i++)
+    //Iterate through the bucket(s) to find the walletID
+    flag = 0;
+    while (b != NULL)
     {
-      if (b->entries[i].empty == 1)
+      for (i = 0; i < b->size; i++)
       {
-        //Adding the
+        if (b->entries[i].empty == 0)
+        {
+          if (strcmp(b->entries[0].walletID, senderWalletID) == 0)
+          {
+            //Adding the transaction to the correct walletID
 
-        break;
+            flag = 1;
+            break;
+          }
+        }
+        else
+        {
+          //Found an empty cell to put the walletID and its transactions
+          b->entries[i].empty = 0;
+          strcpy(b->entries[i].walletID, senderWalletID);
+
+          //Adding the transaction info
+
+          flag = 1;
+          break;
+        }
       }
+
+      prev = b;
+      b = b->next;
+    }
+
+    if (flag == 0)
+    {
+      //I need to add an overflow bucket
+
     }
   }
-}
-
-int bucket_hash(char *id, int bucketSize){
-  int i, value = 0;
-
-  for (i = 0; i < strlen(id); i++)
-  {
-    value += (int)id[i];
-  }
-
-  return (value % ((bucketSize - sizeof(bucket)) / sizeof(bucket_cell)));
 }

@@ -241,12 +241,7 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
     minutes = atoi(array[8]);
 
     //Checking if the transaction is valid
-    if (strcmp(senderWalletID, receiverWalletID) == 0)
-    {
-      printf("The senderWalletID and receiverWalletID can't be the same. Invalid transaction.\n");
-      continue;
-    }
-    if (checkBalance(walletList, senderWalletID, value) == 0)
+    if (checkTransaction(walletList, senderWalletID, receiverWalletID, value) == 0)
     {
       printf("Invalid transaction.\n");
       continue;
@@ -259,17 +254,41 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
   }
 }
 
-int checkBalance(wallet *walletList, char *senderWalletID, int value){
+int checkTransaction(wallet *walletList, char *senderWalletID, char *receiverWalletID, int value){
   wallet_node *curr = walletList->nodes;
-  int sum = 0;
+  int sum = 0, flag = 0;
   leaf *coin;
 
+  if (strcmp(senderWalletID, receiverWalletID) == 0)
+  {
+    printf("The senderWalletID and receiverWalletID can't be the same. ");
+    return 0;
+  }
+
+  while (curr != NULL)
+  {
+    if (strcmp(receiverWalletID, curr->walletID) == 0)
+    {
+      flag = 1;
+      break;
+    }
+
+    curr = curr->next;
+  }
+
+  if (flag == 0)
+  {
+    printf("The receiverWalletID doesn't seem to exist. ");
+    return 0;
+  }
+
+  curr = walletList->nodes;
   while (curr != NULL)
   {
     if (strcmp(senderWalletID, curr->walletID) == 0)
     {
       //Found the senders wallet, now I need to see if
-      //it has enough money to send
+      //it has enough money to transfer
       coin = curr->bitcoins;
       while (coin != NULL)
       {
@@ -284,7 +303,7 @@ int checkBalance(wallet *walletList, char *senderWalletID, int value){
       }
       else
       {
-        printf("The sender doesn't have enough money in it's wallet. ");
+        printf("The senderWalletID doesn't have enough money in it's wallet. ");
         return 0;
       }
     }
@@ -292,7 +311,7 @@ int checkBalance(wallet *walletList, char *senderWalletID, int value){
     curr = curr->next;
   }
 
-  printf("The walletID doesn't seem to exist. ");
+  printf("The senderWalletID doesn't seem to exist. ");
   return 0;
 }
 

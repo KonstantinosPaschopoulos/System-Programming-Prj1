@@ -184,7 +184,7 @@ void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletLis
 table* hash_init(int num_entries){
   int i;
 
-  table *hash_table = malloc(sizeof(table));
+  table *hash_table = (table*)malloc(sizeof(table));
   if (hash_table == NULL)
   {
     perror("Malloc failed");
@@ -193,7 +193,7 @@ table* hash_init(int num_entries){
 
   hash_table->size = num_entries;
 
-  hash_table->h_table = malloc(num_entries * sizeof(bucket*));
+  hash_table->h_table = (bucket**)malloc(num_entries * sizeof(bucket*));
   if (hash_table->h_table == NULL)
   {
     perror("Malloc failed");
@@ -243,20 +243,57 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
     //Checking if the transaction is valid
     if (strcmp(senderWalletID, receiverWalletID) == 0)
     {
-      printf("Invalid transaction. The senderWalletID and receiverWalletID can't be the same.\n");
+      printf("The senderWalletID and receiverWalletID can't be the same. Invalid transaction.\n");
       continue;
     }
-    // if (checkBalance(senderWalletID, value, walletList) != 0)
-    // {
-    //   printf("Invalid transaction. The sender doesn't have enough money in it's wallet.\n");
-    //   continue;
-    // }
+    if (checkBalance(walletList, senderWalletID, value) == 0)
+    {
+      printf("Invalid transaction.\n");
+      continue;
+    }
 
     //delete this
     minutes = minutes * hours * year * month * day * value;
 
-    enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, bucketSize);
+    enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, bucketSize, value);
   }
+}
+
+int checkBalance(wallet *walletList, char *senderWalletID, int value){
+  wallet_node *curr = walletList->nodes;
+  int sum = 0;
+  leaf *coin;
+
+  while (curr != NULL)
+  {
+    if (strcmp(senderWalletID, curr->walletID) == 0)
+    {
+      //Found the senders wallet, now I need to see if
+      //it has enough money to send
+      coin = curr->bitcoins;
+      while (coin != NULL)
+      {
+        sum += coin->balance->value;
+
+        coin = coin->next;
+      }
+
+      if (sum >= value)
+      {
+        return 1;
+      }
+      else
+      {
+        printf("The sender doesn't have enough money in it's wallet. ");
+        return 0;
+      }
+    }
+
+    curr = curr->next;
+  }
+
+  printf("The walletID doesn't seem to exist. ");
+  return 0;
 }
 
 int hash_function(char *id, int range){
@@ -271,9 +308,10 @@ int hash_function(char *id, int range){
   return (value % range);
 }
 
-void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, int bucketSize){
+void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, int bucketSize, int value){
   int buc, i, flag;
   bucket *b, *prev;
+  transaction *trans;
 
   //Updating the senderHashtable first
   buc = hash_function(senderWalletID, senderHashtable->size);
@@ -281,14 +319,14 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
   if (senderHashtable->h_table[buc] == NULL)
   {
     //The bucket needs to be allocated first
-    b = malloc(sizeof(bucket));
+    b = (bucket*)malloc(sizeof(bucket));
     if (b == NULL)
     {
       perror("Malloc failed");
       exit(0);
     }
 
-    b->entries = malloc(((bucketSize - sizeof(bucket)) / sizeof(bucket_cell)) * sizeof(bucket_cell));
+    b->entries = (bucket_cell*)malloc(((bucketSize - sizeof(bucket)) / sizeof(bucket_cell)) * sizeof(bucket_cell));
     if (b->entries == NULL)
     {
       perror("Malloc failed");
@@ -307,7 +345,23 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     strcpy(b->entries[0].walletID, senderWalletID);
 
     //Adding the transaction info
+    trans = (transaction*)malloc(sizeof(transaction));
+    if (trans == NULL)
+    {
+      perror("Malloc failed");
+      exit(0);
+    }
 
+    //-- TODO Edit tree
+    //Search through the senders wallet to find enough balance
+
+    //Go to the correct node and split it
+
+    //Add the node to the transaction
+
+    //Edit the wallet
+
+    //Repeat if it needs more than one coins
 
     //Finaly updating the hash table
     senderHashtable->h_table[buc] = b;

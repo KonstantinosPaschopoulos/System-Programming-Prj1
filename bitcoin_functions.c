@@ -39,7 +39,7 @@ void readBalances(FILE *bitCoinBalancesFile, List *bitcoinList, wallet *walletLi
         {
           if (strcmp(curr_wallet->walletID, walletID) == 0)
           {
-            printf("Two users have the same name, exiting\n");
+            printf("Two users have the same userID, exiting\n");
             exit(3);
           }
 
@@ -303,7 +303,7 @@ int checkTransaction(wallet *walletList, char *senderWalletID, char *receiverWal
       }
       else
       {
-        printf("The senderWalletID doesn't have enough money in it's wallet. ");
+        printf("The senderWalletID doesn't have enough money in its wallet. ");
         return 0;
       }
     }
@@ -328,13 +328,18 @@ int hash_function(char *id, int range){
 }
 
 void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, int bucketSize, int value){
-  int buc, i, flag;
-  bucket *b, *prev;
+  int buc, i, flag, remainder = value, place;
+  bucket *b, *prev, *temp;
   transaction *trans;
+  wallet_node *curr_wall = walletList->nodes;
+  leaf *coin;
+
+  // TODO check the transactionID to be unique
 
   //Updating the senderHashtable first
   buc = hash_function(senderWalletID, senderHashtable->size);
 
+  flag = 0;
   if (senderHashtable->h_table[buc] == NULL)
   {
     //The bucket needs to be allocated first
@@ -363,44 +368,28 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     b->entries[0].empty = 0;
     strcpy(b->entries[0].walletID, senderWalletID);
 
-    //Adding the transaction info
-    trans = (transaction*)malloc(sizeof(transaction));
-    if (trans == NULL)
-    {
-      perror("Malloc failed");
-      exit(0);
-    }
-
-    //-- TODO Edit tree
-    //Search through the senders wallet to find enough balance
-
-    //Go to the correct node and split it
-
-    //Add the node to the transaction
-
-    //Edit the wallet
-
-    //Repeat if it needs more than one coins
-
     //Finaly updating the hash table
     senderHashtable->h_table[buc] = b;
+    place = 0;
+    flag = 1;
   }
   else
   {
     //The bucket exists and I need to find an empty space
-    b = senderHashtable->h_table[buc];
+    temp = senderHashtable->h_table[buc];
 
     //Iterate through the bucket(s) to find the walletID
-    flag = 0;
-    while (b != NULL)
+    while ((temp != NULL) && (flag == 0))
     {
-      for (i = 0; i < b->size; i++)
+      for (i = 0; i < temp->size; i++)
       {
-        if (b->entries[i].empty == 0)
+        if (temp->entries[i].empty == 0)
         {
-          if (strcmp(b->entries[0].walletID, senderWalletID) == 0)
+          if (strcmp(temp->entries[i].walletID, senderWalletID) == 0)
           {
-            //Adding the transaction to the correct walletID
+            //Found the correct place
+            place = i;
+            b = temp;
 
             flag = 1;
             break;
@@ -409,24 +398,52 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
         else
         {
           //Found an empty cell to put the walletID and its transactions
-          b->entries[i].empty = 0;
-          strcpy(b->entries[i].walletID, senderWalletID);
-
-          //Adding the transaction info
+          temp->entries[i].empty = 0;
+          strcpy(temp->entries[i].walletID, senderWalletID);
+          place = i;
+          b = temp;
 
           flag = 1;
           break;
         }
       }
 
-      prev = b;
-      b = b->next;
-    }
-
-    if (flag == 0)
-    {
-      //I need to add an overflow bucket
-
+      prev = temp;
+      temp = temp->next;
     }
   }
+
+  //I need to add an overflow bucket
+  if (flag == 0)
+  {
+    temp = (bucket*)malloc(sizeof(bucket));
+    if (temp == NULL)
+    {
+      perror("Malloc failed");
+      exit(0);
+    }
+
+    temp->entries = (bucket_cell*)malloc(((bucketSize - sizeof(bucket)) / sizeof(bucket_cell)) * sizeof(bucket_cell));
+    if (temp->entries == NULL)
+    {
+      perror("Malloc failed");
+      exit(0);
+    }
+
+    temp->size = (bucketSize - sizeof(bucket)) / sizeof(bucket_cell);  //Number of entries in every bucket
+
+    for (i = 0; i < temp->size; i++)
+    {
+      temp->entries[i].empty = 1;
+    }
+
+    //Entering the walletID in the first cell
+    temp->entries[0].empty = 0;
+    strcpy(temp->entries[0].walletID, senderWalletID);
+
+    b = prev->next = temp;  //Adding the overflow bucket after the last filled bucket
+    place = 0;
+  }
+
+  //Adding the new transaction to the bucket b at the place that was found
 }

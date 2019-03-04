@@ -13,7 +13,7 @@ typedef struct List{
 
 typedef struct wallet_node{
   char walletID[50];
-  struct leaf *bitcoins; //A list of every bitcoin that the user owns
+  struct leaf *bitcoins;  //A list of every bitcoin that the user owns
   struct wallet_node *next;
 } wallet_node;
 
@@ -36,8 +36,8 @@ typedef struct tree_node{
 
 typedef struct bucket{
   int size;
-  struct bucket_cell *entries;//An array of walletIDs that point to different transactions
-  struct bucket *next; //In case of overflow
+  struct bucket_cell *entries;  //An array of walletIDs that point to different transactions
+  struct bucket *next;  //In case of overflow
 } bucket;
 
 typedef struct bucket_cell{

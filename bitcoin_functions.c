@@ -246,9 +246,45 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
       printf("Invalid transaction.\n");
       continue;
     }
+    if (checkTransactionID(array[0], senderHashtable) == 0)
+    {
+      printf("The transactionID isn't unique. Invalid transaction.\n");
+      continue;
+    }
 
     enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, bucketSize, info);
   }
+}
+
+int checkTransactionID(char *transactionID, table *hash_t){
+  int i, j;
+  bucket *buc;
+  transaction *trans;
+
+  //Making sure that the transactionID is unique
+  for (i = 0; i < hash_t->size; i++)
+  {
+    buc = hash_t->h_table[i];
+
+    if (buc != NULL)
+    {
+      for (j = 0; j < buc->size; j++)
+      {
+        trans = buc->entries[j].transactions;
+        while (trans != NULL)
+        {
+          if (strcmp(transactionID, trans->info.transactionID) == 0)
+          {
+            return 0;
+          }
+
+          trans = trans->next;
+        }
+      }
+    }
+  }
+
+  return 1;
 }
 
 int checkTransaction(wallet *walletList, char *senderWalletID, char *receiverWalletID, int value){
@@ -316,7 +352,7 @@ int hash_function(char *id, int range){
   int i, value = 0;
 
   //The hash function works by adding the ASCII values of each character
-  for (i = 0; i < strlen(id); i++)
+  for (i = 0; i < (int)strlen(id); i++)
   {
     value += (int)id[i];
   }
@@ -330,8 +366,7 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
   transaction *trans, *curr_trans;
   wallet_node *curr_wall;
   leaf *coin;
-
-  // TODO check the transactionID to be unique
+  //TODO split in functions
 
   //Updating the senderHashtable first
   buc = hash_function(senderWalletID, senderHashtable->size);
@@ -538,13 +573,13 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
   }
 
   //Adding the new transaction to the bucket b at the place that was found, at the end of the list
-  curr_trans = b->entries[place].transactions;
-  if (curr_trans == NULL)
+  if (b->entries[place].transactions == NULL)
   {
-    curr_trans = trans;
+    b->entries[place].transactions = trans;
   }
   else
   {
+    curr_trans = b->entries[place].transactions;
     while((curr_trans->next) != NULL)
     {
       curr_trans = curr_trans->next;
@@ -560,4 +595,5 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
 
   //TODO Edit the wallet
 
+  //TODO repeat for the other hash table
 }

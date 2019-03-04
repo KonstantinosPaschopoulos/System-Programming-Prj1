@@ -127,8 +127,7 @@ void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletLis
   //Adding a pointer to the tree
   newBTC->tree = root;
 
-  //After I made sure the bitCoin is unique
-  //I enter it in the bitcoin list
+  //After I made sure the bitCoin is unique I enter it in the bitcoin list
   if (bitcoinList->nodes == NULL)
   {
     //The list is empty
@@ -209,11 +208,12 @@ table* hash_init(int num_entries){
 }
 
 void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHashtable, table *receiverHashtable, int bucketSize){
-  int value, day, month, year, hours, minutes, i;
-  char whole_line[250], senderWalletID[50], receiverWalletID[50], transactionID[50];
+  int value, i;
+  char whole_line[250], senderWalletID[50], receiverWalletID[50];
   char array[9][55];
   char* token;
   char delimiters[] = " -:";
+  transaction_info info;
 
   //Using fgets to read from the input until I reach the end of the file
   while (fgets(whole_line, 250, transactionsFile))
@@ -230,15 +230,15 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
     }
 
     //Assigning the correct value to each variable
-    strcpy(transactionID, array[0]);
     strcpy(senderWalletID, array[1]);
     strcpy(receiverWalletID, array[2]);
-    value = atoi(array[3]);
-    day = atoi(array[4]);
-    month = atoi(array[5]);
-    year = atoi(array[6]);
-    hours = atoi(array[7]);
-    minutes = atoi(array[8]);
+    info.value = value = atoi(array[3]);
+    info.day = atoi(array[4]);
+    info.month = atoi(array[5]);
+    info.year = atoi(array[6]);
+    info.hours = atoi(array[7]);
+    info.minutes = atoi(array[8]);
+    strcpy(info.transactionID, array[0]);
 
     //Checking if the transaction is valid
     if (checkTransaction(walletList, senderWalletID, receiverWalletID, value) == 0)
@@ -247,10 +247,7 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
       continue;
     }
 
-    //delete this
-    minutes = minutes * hours * year * month * day * value;
-
-    enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, bucketSize, value);
+    enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, bucketSize, info);
   }
 }
 
@@ -327,11 +324,11 @@ int hash_function(char *id, int range){
   return (value % range);
 }
 
-void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, int bucketSize, int value){
-  int buc, i, flag, remainder = value, place;
+void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, int bucketSize, transaction_info t_i){
+  int buc, i, flag, remainder = t_i.value, place;
   bucket *b, *prev, *temp;
-  transaction *trans;
-  wallet_node *curr_wall = walletList->nodes;
+  transaction *trans, *curr_trans;
+  wallet_node *curr_wall;
   leaf *coin;
 
   // TODO check the transactionID to be unique
@@ -441,9 +438,104 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     temp->entries[0].empty = 0;
     strcpy(temp->entries[0].walletID, senderWalletID);
 
-    b = prev->next = temp;  //Adding the overflow bucket after the last filled bucket
+    b = prev->next = temp;  //Adding the overflow bucket after the last full bucket
     place = 0;
   }
 
-  //Adding the new transaction to the bucket b at the place that was found
+  //Allocating a new transaction node to add to the list
+  trans = (transaction*)malloc(sizeof(transaction));
+  if (trans == NULL)
+  {
+    perror("Malloc failed");
+    exit(0);
+  }
+  trans->tree = NULL;
+
+  //Searching through the senders wallet to find enough balance
+  curr_wall = walletList->nodes;
+  while (curr_wall != NULL)
+  {
+    if (strcmp(senderWalletID, curr_wall->walletID) == 0)
+    {
+      //Iterating through the availiable bitcoins to find enough balance to transfer
+      coin = curr_wall->bitcoins;
+      while (coin != NULL)
+      {
+        //Updating the bitcoin's tree
+        tree_node *new_balance = (tree_node*)malloc(sizeof(tree_node));
+        if (new_balance == NULL)
+        {
+          perror("Malloc failed");
+          exit(0);
+        }
+        strcpy(new_balance->walletID, receiverWalletID);
+        tree_node *rest = (tree_node*)malloc(sizeof(tree_node));
+        if (rest == NULL)
+        {
+          perror("Malloc failed");
+          exit(0);
+        }
+        strcpy(rest->walletID, senderWalletID);
+        if ((coin->balance->value - remainder) <= 0)
+        {
+          new_balance->value = coin->balance->value;
+          rest->value = 0;
+        }
+        else
+        {
+          new_balance->value = remainder;
+          rest->value = coin->balance->value - remainder;
+        }
+
+        //Updating the tree
+        coin->balance->left = new_balance;
+        coin->balance->right = rest;
+
+        if (trans->tree == NULL)
+        {
+          trans->info = t_i;
+          trans->tree = coin->balance->left;
+          trans->next = NULL;
+          trans->next_bitcoin = NULL;
+        }
+        else
+        {
+          //In the case that more than one bitcoin is needed
+          //to complete the transfer
+          curr_trans = trans;
+          while((curr_trans->next_bitcoin) != NULL)
+          {
+            curr_trans = curr_trans->next_bitcoin;
+          }
+
+          curr_trans->next_bitcoin = (transaction*)malloc(sizeof(transaction));
+          if (curr_trans->next_bitcoin == NULL)
+          {
+            perror("Malloc failed");
+            exit(0);
+          }
+          curr_trans->next_bitcoin->tree = coin->balance->left;
+          curr_trans->next_bitcoin->next_bitcoin = NULL;
+        }
+
+        //If more money are needed in order to complete the transfer
+        //the process is repeated
+        remainder -= coin->balance->value;
+        if (remainder <= 0)
+        {
+          break;
+        }
+        coin = coin->next;
+      }
+
+      break;
+    }
+
+    curr_wall = curr_wall->next;
+  }
+
+  //TODO Adding the new transaction to the bucket b at the place that was found
+
+  //TODO Edit the wallet
+
 }

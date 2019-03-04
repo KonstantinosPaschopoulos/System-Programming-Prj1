@@ -51,12 +51,16 @@ typedef struct table {
   bucket **h_table;
 } table;
 
-typedef struct transaction{
+typedef struct transaction_info{
   char transactionID[50];
-  int day, month, year, hours, minutes;
+  int day, month, year, hours, minutes, value;
+} transaction_info;
+
+typedef struct transaction{
+  struct transaction_info info;
   struct tree_node *tree;
   struct transaction *next;
-  struct transaction *remainder;  //In case more than two bitocins are needed for the same transaction
+  struct transaction *next_bitcoin;  //In case more than two bitocins are needed for the same transaction
 } transaction;
 
 #endif

@@ -361,7 +361,7 @@ int hash_function(char *id, int range){
 }
 
 void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, int bucketSize, transaction_info t_i){
-  int buc, i, flag, remainder = t_i.value, place;
+  int buc, i, flag, remainder = t_i.value, place, old_value;
   bucket *b, *prev, *temp;
   transaction *trans, *curr_trans;
   wallet_node *curr_wall;
@@ -499,6 +499,8 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
       coin = curr_wall->bitcoins;
       while (coin != NULL)
       {
+        old_value = coin->balance->value;
+
         //Updating the bitcoin's tree
         tree_node *new_balance = (tree_node*)malloc(sizeof(tree_node));
         if (new_balance == NULL)
@@ -556,9 +558,13 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
           curr_trans->next_bitcoin->next_bitcoin = NULL;
         }
 
+        //Also update the wallets
+        addBitcointoWallet(walletList, receiverWalletID, coin->bitcoin, coin->balance->left); //receiver
+        coin->balance = coin->balance->right; //sender
+
         //If more money are needed in order to complete the transfer
         //the process is repeated
-        remainder -= coin->balance->value;
+        remainder -= old_value;
         if (remainder <= 0)
         {
           break;
@@ -593,7 +599,45 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
 
 
 
-  //TODO Edit the wallet
 
   //TODO repeat for the other hash table
+}
+
+void addBitcointoWallet(wallet *walletList, char *wID, bitcoin_node *id, tree_node *trans){
+  wallet_node *curr_wall = walletList->nodes;
+  leaf *new_leaf, *curr_leaf;
+
+  //Find the correct wallet and add a new bitcoin
+  while (curr_wall != NULL)
+  {
+    if (strcmp(curr_wall->walletID, wID) == 0)
+    {
+      new_leaf = (leaf*)malloc(sizeof(leaf));
+      if (new_leaf == NULL)
+      {
+        perror("Malloc failed");
+        exit(0);
+      }
+      new_leaf->bitcoin = id;
+      new_leaf->balance = trans;
+      new_leaf->next = NULL;
+
+      if (curr_wall->bitcoins == NULL)
+      {
+        curr_wall->bitcoins = new_leaf;
+      }
+      else
+      {
+        curr_leaf = curr_wall->bitcoins;
+        while ((curr_leaf->next) != NULL)
+        {
+          curr_leaf = curr_leaf->next;
+        }
+
+        curr_leaf->next = new_leaf;
+      }
+    }
+
+    curr_wall = curr_wall->next;
+  }
 }

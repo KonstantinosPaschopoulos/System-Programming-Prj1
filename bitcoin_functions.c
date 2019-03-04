@@ -364,6 +364,7 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     //Entering the walletID in the first cell
     b->entries[0].empty = 0;
     strcpy(b->entries[0].walletID, senderWalletID);
+    b->entries[0].transactions = NULL;
 
     //Finaly updating the hash table
     senderHashtable->h_table[buc] = b;
@@ -397,6 +398,7 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
           //Found an empty cell to put the walletID and its transactions
           temp->entries[i].empty = 0;
           strcpy(temp->entries[i].walletID, senderWalletID);
+          temp->entries[i].transactions = NULL;
           place = i;
           b = temp;
 
@@ -437,6 +439,7 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     //Entering the walletID in the first cell
     temp->entries[0].empty = 0;
     strcpy(temp->entries[0].walletID, senderWalletID);
+    temp->entries[0].transactions = NULL;
 
     b = prev->next = temp;  //Adding the overflow bucket after the last full bucket
     place = 0;
@@ -534,7 +537,26 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     curr_wall = curr_wall->next;
   }
 
-  //TODO Adding the new transaction to the bucket b at the place that was found
+  //Adding the new transaction to the bucket b at the place that was found, at the end of the list
+  curr_trans = b->entries[place].transactions;
+  if (curr_trans == NULL)
+  {
+    curr_trans = trans;
+  }
+  else
+  {
+    while((curr_trans->next) != NULL)
+    {
+      curr_trans = curr_trans->next;
+    }
+
+    curr_trans->next = trans;
+  }
+
+
+
+
+
 
   //TODO Edit the wallet
 

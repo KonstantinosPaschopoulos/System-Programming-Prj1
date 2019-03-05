@@ -246,7 +246,7 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
       printf("Invalid transaction.\n");
       continue;
     }
-    if (checkTransactionID(array[0], senderHashtable) == 0)
+    if (checkTransactionID(array[0], receiverHashtable) == 0)
     {
       printf("The transactionID isn't unique. Invalid transaction.\n");
       continue;
@@ -366,7 +366,6 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
   transaction *trans, *curr_trans;
   wallet_node *curr_wall;
   leaf *coin;
-  //TODO split in functions
 
   //Updating the senderHashtable first
   buc = hash_function(senderWalletID, senderHashtable->size);
@@ -594,13 +593,133 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     curr_trans->next = trans;
   }
 
+  //Updating the receiverHashtable now
+  buc = hash_function(receiverWalletID, receiverHashtable->size);
 
+  flag = 0;
+  if (receiverHashtable->h_table[buc] == NULL)
+  {
+    //The bucket needs to be allocated first
+    b = (bucket*)malloc(sizeof(bucket));
+    if (b == NULL)
+    {
+      perror("Malloc failed");
+      exit(0);
+    }
 
+    b->entries = (bucket_cell*)malloc(((bucketSize - sizeof(bucket)) / sizeof(bucket_cell)) * sizeof(bucket_cell));
+    if (b->entries == NULL)
+    {
+      perror("Malloc failed");
+      exit(0);
+    }
 
+    b->size = (bucketSize - sizeof(bucket)) / sizeof(bucket_cell);  //Number of entries in every bucket
 
+    for (i = 0; i < b->size; i++)
+    {
+      b->entries[i].empty = 1;
+    }
 
+    //Entering the walletID in the first cell
+    b->entries[0].empty = 0;
+    strcpy(b->entries[0].walletID, receiverWalletID);
+    b->entries[0].transactions = NULL;
 
-  //TODO repeat for the other hash table
+    //Finaly updating the hash table
+    receiverHashtable->h_table[buc] = b;
+    place = 0;
+    flag = 1;
+  }
+  else
+  {
+    //The bucket exists and I need to find an empty space
+    temp = receiverHashtable->h_table[buc];
+
+    //Iterate through the bucket(s) to find the walletID
+    while ((temp != NULL) && (flag == 0))
+    {
+      for (i = 0; i < temp->size; i++)
+      {
+        if (temp->entries[i].empty == 0)
+        {
+          if (strcmp(temp->entries[i].walletID, receiverWalletID) == 0)
+          {
+            //Found the correct place
+            place = i;
+            b = temp;
+
+            flag = 1;
+            break;
+          }
+        }
+        else
+        {
+          //Found an empty cell to put the walletID and its transactions
+          temp->entries[i].empty = 0;
+          strcpy(temp->entries[i].walletID, receiverWalletID);
+          temp->entries[i].transactions = NULL;
+          place = i;
+          b = temp;
+
+          flag = 1;
+          break;
+        }
+      }
+
+      prev = temp;
+      temp = temp->next;
+    }
+  }
+
+  //I need to add an overflow bucket
+  if (flag == 0)
+  {
+    temp = (bucket*)malloc(sizeof(bucket));
+    if (temp == NULL)
+    {
+      perror("Malloc failed");
+      exit(0);
+    }
+
+    temp->entries = (bucket_cell*)malloc(((bucketSize - sizeof(bucket)) / sizeof(bucket_cell)) * sizeof(bucket_cell));
+    if (temp->entries == NULL)
+    {
+      perror("Malloc failed");
+      exit(0);
+    }
+
+    temp->size = (bucketSize - sizeof(bucket)) / sizeof(bucket_cell);  //Number of entries in every bucket
+
+    for (i = 0; i < temp->size; i++)
+    {
+      temp->entries[i].empty = 1;
+    }
+
+    //Entering the walletID in the first cell
+    temp->entries[0].empty = 0;
+    strcpy(temp->entries[0].walletID, receiverWalletID);
+    temp->entries[0].transactions = NULL;
+
+    b = prev->next = temp;  //Adding the overflow bucket after the last full bucket
+    place = 0;
+  }
+
+  //Adding the new transaction to the bucket b at the place that was found, at the end of the list
+  if (b->entries[place].transactions == NULL)
+  {
+    b->entries[place].transactions = trans;
+  }
+  else
+  {
+    curr_trans = b->entries[place].transactions;
+    while((curr_trans->next) != NULL)
+    {
+      curr_trans = curr_trans->next;
+    }
+
+    curr_trans->next = trans;
+  }
 }
 
 void addBitcointoWallet(wallet *walletList, char *wID, bitcoin_node *id, tree_node *trans){

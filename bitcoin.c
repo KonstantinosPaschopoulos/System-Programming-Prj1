@@ -50,9 +50,9 @@ int main(int argc, char **argv){
     else if (strcmp(argv[i], "-b") == 0)
     {
       bucketSize = atoi(argv[i + 1]);
-      if (bucketSize < (int)sizeof(bucket))
+      if (bucketSize < (int)(sizeof(bucket) + sizeof(bucket_cell)))
       {
-        printf("bucketSize should be more than %lu bytes\n", sizeof(bucket));
+        printf("bucketSize should be more than %lu bytes\n", (sizeof(bucket) + sizeof(bucket_cell)));
         exit(2);
       }
 

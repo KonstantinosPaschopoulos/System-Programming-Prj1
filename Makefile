@@ -1,6 +1,6 @@
-OBJS 	= bitcoin.o bitcoin_functions.o
-SOURCE	= bitcoin.c bitcoin_functions.c
-HEADER  = mytypes.h bitcoin_functions.h OrderedLinkedList.h
+OBJS 	= bitcoin.o bitcoin_functions.o command_functions.o
+SOURCE	= bitcoin.c bitcoin_functions.c command_functions.c
+HEADER  = mytypes.h bitcoin_functions.h OrderedLinkedList.h command_functions.h
 OUT  	= bitcoin
 CC	= gcc
 FLAGS   = -c -Wall
@@ -13,6 +13,9 @@ bitcoin.o: bitcoin.c
 
 bitcoin_functions.o: bitcoin_functions.c
 	$(CC) $(FLAGS) bitcoin_functions.c
+
+command_functions.o: command_functions.c
+	$(CC) $(FLAGS) command_functions.c
 
 clean:
 	rm -f $(OBJS) $(OUT)

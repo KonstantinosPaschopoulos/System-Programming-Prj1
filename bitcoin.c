@@ -3,9 +3,11 @@
 #include <string.h>
 #include "mytypes.h"
 #include "bitcoin_functions.h"
+#include "command_functions.h"
 
 int main(int argc, char **argv){
-  int i, bitCoinValue, senderHashtableNumOfEntries, receiverHashtableNumOfEntries, bucketSize;
+  int i, bitCoinValue, senderHashtableNumOfEntries, receiverHashtableNumOfEntries, bucketSize, flag;
+  char user_input[MAX_INPUT];
   List *bitcoinList;
   wallet *walletList;
   FILE *bitCoinBalancesFile = NULL;
@@ -113,7 +115,47 @@ int main(int argc, char **argv){
   table *senderHashtable = hash_init(senderHashtableNumOfEntries);
   table *receiverHashtable = hash_init(receiverHashtableNumOfEntries);
 
+  //Parsing the initial transactions
   readTransactions(transactionsFile, walletList, senderHashtable, receiverHashtable, bucketSize);
+
+  //After all the data structures are set, the program is ready to get input from the user
+  flag = 1;
+  while (flag != 0)
+  {
+    printf("\n");
+
+    fgets(user_input, MAX_INPUT, stdin);
+    if ((strlen(user_input) > 0) && (user_input[strlen(user_input) - 1] == '\n'))
+    {
+      user_input[strlen(user_input) - 1] = '\0';
+    }
+
+    //Using a switch statement to call the right function
+    switch (get_command(user_input))
+    {
+      case 1:
+        break;
+      case 2:
+        break;
+      case 3:
+        break;
+      case 4:
+        break;
+      case 5:
+        break;
+      case 6:
+        break;
+      case 7:
+        break;
+      case 8:
+        break;
+      case 9:
+        break;
+      default:
+        printf("Invalid input\n");
+        break;
+    }
+  }
 
   return 0;
 }

@@ -248,6 +248,7 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
     }
     if (checkTransactionID(array[0], receiverHashtable) == 0)
     {
+      // TODO exit if found one duplicate transactionID
       printf("The transactionID isn't unique. Invalid transaction.\n");
       continue;
     }

@@ -1,6 +1,8 @@
 #ifndef MYTYPES_H
 #define MYTYPES_H
 
+#define MAX_INPUT 250
+
 typedef struct bitcoin_node{
   int bitCoinID;
   struct tree_node *tree;  //A pointer to the bitcoin's tree

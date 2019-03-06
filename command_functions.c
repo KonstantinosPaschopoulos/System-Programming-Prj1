@@ -199,7 +199,10 @@ void traceCoin(table *hashtable, int bitcoinID){
           bitcoins = trans;
           while (bitcoins != NULL)
           {
-            if (bitcoins)
+            if (bitcoins->tree->bitCoinID == bitcoinID)
+            {
+
+            }
 
             bitcoins = bitcoins->next_bitcoin;
           }
@@ -218,5 +221,5 @@ void traceCoin(table *hashtable, int bitcoinID){
 }
 
 void exitProgram(List *bitcoinList, wallet *walletList, table *senderHashtable, table *receiverHashtable){
-  
+
 }

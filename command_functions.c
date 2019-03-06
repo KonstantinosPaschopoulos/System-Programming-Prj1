@@ -68,3 +68,40 @@ int get_command(char *input){
 
   return 0;
 }
+
+void walletStatus(wallet *walletList, char *walletID){
+  wallet_node *curr;
+  leaf *coin;
+  int sum = 0, flag = 0;
+
+  curr = walletList->nodes;
+  while (curr != NULL)
+  {
+    //Finding the correct wallet
+    if (strcmp(walletID, curr->walletID) == 0)
+    {
+      //Adding up all the bitcoins
+      coin = curr->bitcoins;
+      while (coin != NULL)
+      {
+        sum += coin->balance->value;
+
+        coin = coin->next;
+      }
+
+      flag = 1;
+      break;
+    }
+
+    curr = curr->next;
+  }
+
+  if (flag == 0)
+  {
+    printf("The wallet %s doesn't exist\n", walletID);
+  }
+  else
+  {
+    printf("The wallet %s currently has %d$\n", walletID, sum);
+  }
+}

@@ -157,7 +157,7 @@ int main(int argc, char **argv){
       case 8:
         //TraceCoin
         sscanf(user_input, "%s %d", command, &bitcoinID);
-        traceCoin(senderHashtable, bitcoinID);
+        traceCoin(bitcoinList, bitcoinID);
         break;
       case 9:
         //Exit

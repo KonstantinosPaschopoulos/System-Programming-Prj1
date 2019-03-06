@@ -29,9 +29,15 @@ typedef struct wallet{
     wallet_node *nodes;
 } wallet;
 
+typedef struct transaction_info{
+  char transactionID[50];
+  int value, day, month, year, hours, minutes;
+} transaction_info;
+
 typedef struct tree_node{
   char walletID[50];
   int value;
+  struct transaction_info info;
   struct tree_node *left;
   struct tree_node *right;
 } tree_node;
@@ -53,13 +59,7 @@ typedef struct table {
   bucket **h_table;
 } table;
 
-typedef struct transaction_info{
-  char transactionID[50];
-  int day, month, year, hours, minutes, value;
-} transaction_info;
-
 typedef struct transaction{
-  struct transaction_info info;
   struct tree_node *tree;
   struct transaction *next;
   struct transaction *next_bitcoin;  //In case more than two bitocins are needed for the same transaction

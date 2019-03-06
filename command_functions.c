@@ -175,49 +175,50 @@ int countTransactions(tree_node *node){
   }
 }
 
-void traceCoin(table *hashtable, int bitcoinID){
-  /*
-  int i, j;
-  bucket *buc;
-  transaction *trans, *bitcoins;
+void traceCoin(List *bitcoinList, int bitcoinID){
+  bitcoin_node *curr;
+  int flag = 0;
 
-
-  //Iterate through the whole hashtable and find every transaction
-  //that used the bitcoin print its information
-  for (i = 0; i < hashtable->size; i++)
+  curr = bitcoinList->nodes;
+  while (curr != NULL)
   {
-    buc = hashtable->h_table[i];
-
-    if (buc != NULL)
+    //Finding the correct bitCoin
+    if (curr->bitCoinID == bitcoinID)
     {
-      for (j = 0; j < buc->size; j++)
-      {
-        trans = buc->entries[j].transactions;
-        while (trans != NULL)
-        {
-          //Search all the bitcoins that were used by this transaction
-          bitcoins = trans;
-          while (bitcoins != NULL)
-          {
-            if (bitcoins->tree->bitCoinID == bitcoinID)
-            {
+      //Using a recursive function to print the history of this bitcoin
+      printTransactions(curr->tree->walletID, curr->tree, 0);
 
-            }
-
-            bitcoins = bitcoins->next_bitcoin;
-          }
-
-          // if (strcmp(transactionID, trans->info.transactionID) == 0)
-          // {
-          //   return 0;
-          // }
-
-          trans = trans->next;
-        }
-      }
+      flag = 1;
+      break;
     }
+
+    curr = curr->next;
   }
-  */
+
+  if (flag == 0)
+  {
+    printf("The bitCoin %d doesn't exist\n", bitcoinID);
+  }
+}
+
+void printTransactions(char *from, tree_node *root, int yes){
+  if (root == NULL)
+  {
+    return;
+  }
+  else
+  {
+    if (yes == 1)
+    {
+      printf("%s %s %s %d %d-%d-%d %d:%d\n", root->info.transactionID, from, root->walletID,
+                root->info.value, root->info.day, root->info.month, root->info.year,
+              root->info.hours, root->info.minutes);
+    }
+
+    //Go to the children
+    printTransactions(root->walletID, root->right, 0);
+    printTransactions(root->walletID, root->left, 1);
+  }
 }
 
 void exitProgram(List *bitcoinList, wallet *walletList, table *senderHashtable, table *receiverHashtable){

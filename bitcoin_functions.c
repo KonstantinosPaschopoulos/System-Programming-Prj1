@@ -274,7 +274,7 @@ int checkTransactionID(char *transactionID, table *hash_t){
         trans = buc->entries[j].transactions;
         while (trans != NULL)
         {
-          if (strcmp(transactionID, trans->info.transactionID) == 0)
+          if (strcmp(transactionID, trans->tree->info.transactionID) == 0)
           {
             return 0;
           }
@@ -529,11 +529,13 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
 
         //Updating the tree
         coin->balance->left = new_balance;
+        //Since the left child is the one that takes part in the transaction,
+        //only the left child has information about the transaction
+        coin->balance->left->info = t_i;
         coin->balance->right = rest;
 
         if (trans->tree == NULL)
         {
-          trans->info = t_i;
           trans->tree = coin->balance->left;
           trans->next = NULL;
           trans->next_bitcoin = NULL;

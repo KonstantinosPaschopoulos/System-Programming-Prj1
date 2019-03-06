@@ -120,6 +120,7 @@ void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletLis
   }
   root->value = bitCoinValue;
   strcpy(root->walletID, walletID);
+  root->bitCoinID = id;
 
   newBTC->bitCoinID = id;
   newBTC->next = NULL;
@@ -509,6 +510,7 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
           exit(0);
         }
         strcpy(new_balance->walletID, receiverWalletID);
+        new_balance->bitCoinID = coin->balance->bitCoinID;
         tree_node *rest = (tree_node*)malloc(sizeof(tree_node));
         if (rest == NULL)
         {
@@ -516,6 +518,7 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
           exit(0);
         }
         strcpy(rest->walletID, senderWalletID);
+        rest->bitCoinID = coin->balance->bitCoinID;
         if ((coin->balance->value - remainder) <= 0)
         {
           new_balance->value = coin->balance->value;

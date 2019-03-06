@@ -174,3 +174,49 @@ int countTransactions(tree_node *node){
     return (sum_left + sum_right);
   }
 }
+
+void traceCoin(table *hashtable, int bitcoinID){
+  /*
+  int i, j;
+  bucket *buc;
+  transaction *trans, *bitcoins;
+
+
+  //Iterate through the whole hashtable and find every transaction
+  //that used the bitcoin print its information
+  for (i = 0; i < hashtable->size; i++)
+  {
+    buc = hashtable->h_table[i];
+
+    if (buc != NULL)
+    {
+      for (j = 0; j < buc->size; j++)
+      {
+        trans = buc->entries[j].transactions;
+        while (trans != NULL)
+        {
+          //Search all the bitcoins that were used by this transaction
+          bitcoins = trans;
+          while (bitcoins != NULL)
+          {
+            if (bitcoins)
+
+            bitcoins = bitcoins->next_bitcoin;
+          }
+
+          // if (strcmp(transactionID, trans->info.transactionID) == 0)
+          // {
+          //   return 0;
+          // }
+
+          trans = trans->next;
+        }
+      }
+    }
+  }
+  */
+}
+
+void exitProgram(List *bitcoinList, wallet *walletList, table *senderHashtable, table *receiverHashtable){
+  
+}

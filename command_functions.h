@@ -4,3 +4,5 @@ int get_command(char *);
 void walletStatus(wallet *, char *);
 void bitCoinStatus(List *, int);
 int countTransactions(tree_node *);
+void traceCoin(table *, int);
+void exitProgram(List *, wallet *, table *, table *);

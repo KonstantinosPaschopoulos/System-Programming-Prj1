@@ -105,3 +105,72 @@ void walletStatus(wallet *walletList, char *walletID){
     printf("The wallet %s currently has %d$\n", walletID, sum);
   }
 }
+
+void bitCoinStatus(List *bitcoinList, int bitcoinID){
+  bitcoin_node *curr;
+  tree_node *node;
+  int flag = 0, transactions = 0, unspent;
+
+  curr = bitcoinList->nodes;
+  while (curr != NULL)
+  {
+    //Finding the correct bitCoin
+    if (curr->bitCoinID == bitcoinID)
+    {
+      //To find how much of it has stayed unspent I will follow only
+      //the right child of every node until I reach the end
+      node = curr->tree;
+      while (node != NULL)
+      {
+        unspent = node->value;
+
+        node = node->right;
+      }
+
+      //Using a recursive function I count only how many left nodes exist in the tree
+      transactions = countTransactions(curr->tree);
+
+      flag = 1;
+      break;
+    }
+
+    curr = curr->next;
+  }
+
+  if (flag == 0)
+  {
+    printf("The bitCoin %d doesn't exist\n", bitcoinID);
+  }
+  else
+  {
+    printf("%d %d %d\n", bitcoinID, transactions, unspent);
+  }
+}
+
+int countTransactions(tree_node *node){
+  int sum_left = 0, sum_right = 0;
+
+  //In order to count how many transactions have happened
+  //I count how many left children exist in the tree
+  if (node == NULL)
+  {
+    //Return 0 when I reach an end
+    return 0;
+  }
+  else
+  {
+    if (node->left != NULL)
+    {
+      sum_left = countTransactions(node->left);
+
+      //Add 1 to the sum, for every left child
+      sum_left++;
+    }
+    if (node->right != NULL)
+    {
+      sum_right = countTransactions(node->right);
+    }
+
+    return (sum_left + sum_right);
+  }
+}

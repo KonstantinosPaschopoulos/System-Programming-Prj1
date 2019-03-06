@@ -7,6 +7,7 @@
 
 int main(int argc, char **argv){
   int i, bitCoinValue, senderHashtableNumOfEntries, receiverHashtableNumOfEntries, bucketSize, flag;
+  int bitcoinID;
   char user_input[MAX_INPUT], command[50], walletID[50];
   List *bitcoinList;
   wallet *walletList;
@@ -150,15 +151,18 @@ int main(int argc, char **argv){
         break;
       case 7:
         //bitCoinStatus
+        sscanf(user_input, "%s %d", command, &bitcoinID);
+        bitCoinStatus(bitcoinList, bitcoinID);
         break;
       case 8:
         //TraceCoin
         break;
       case 9:
         //Exit
+        flag = 0;
         break;
       default:
-        printf("Invalid input\n");
+        printf("Invalid command\n");
         break;
     }
   }

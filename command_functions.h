@@ -4,6 +4,7 @@ int get_command(char *);
 void findEarnings(char *, table *);
 void findPayments(char *, table *);
 int checkFind(char *, char *, int *, int*, int *, int *, int *, int *, int*, int *);
+int checkInput(char *);
 void walletStatus(wallet *, char *);
 void bitCoinStatus(List *, int);
 int countTransactions(tree_node *);

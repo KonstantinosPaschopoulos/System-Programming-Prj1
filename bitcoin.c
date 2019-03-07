@@ -150,17 +150,31 @@ int main(int argc, char **argv){
         break;
       case 6:
         //walletStatus
-        // TODO better checks for numbers of strings
+        if (checkInput(user_input) == -1)
+        {
+          printf("Invalid command\n");
+          continue;
+        }
         sscanf(user_input, "%s %s", command, walletID);
         walletStatus(walletList, walletID);
         break;
       case 7:
         //bitCoinStatus
+        if (checkInput(user_input) != 1)
+        {
+          printf("Invalid command\n");
+          continue;
+        }
         sscanf(user_input, "%s %d", command, &bitcoinID);
         bitCoinStatus(bitcoinList, bitcoinID);
         break;
       case 8:
         //TraceCoin
+        if (checkInput(user_input) != 1)
+        {
+          printf("Invalid command\n");
+          continue;
+        }
         sscanf(user_input, "%s %d", command, &bitcoinID);
         traceCoin(bitcoinList, bitcoinID);
         break;

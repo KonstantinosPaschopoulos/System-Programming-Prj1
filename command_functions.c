@@ -635,6 +635,45 @@ void printTransactions(char *from, tree_node *root, int yes){
   }
 }
 
+int checkInput(char *input){
+  char input_copy[MAX_INPUT];
+  char *token;
+  int i, j, flag = 0;
+
+  strcpy(input_copy, input);
+
+  //Count how many arguments are in the command
+  for (token = strtok(input_copy, " "), i = 0; token; token = strtok(NULL, " "), i++)
+  {
+    //Also check if the second argument is a number
+    if (i == 1)
+    {
+      for (j = 0; j < (int)strlen(token); j++)
+      {
+        if(token[j] > '9' || token[j] < '0')
+        {
+          flag = 1;
+          break;
+        }
+      }
+    }
+  }
+
+  if (i != 2)
+  {
+    return -1;
+  }
+
+  if (flag == 0)
+  {
+    return 1;
+  }
+  else
+  {
+    return 2;
+  }
+}
+
 void exitProgram(List *bitcoinList, wallet *walletList, table *senderHashtable, table *receiverHashtable){
 
 }

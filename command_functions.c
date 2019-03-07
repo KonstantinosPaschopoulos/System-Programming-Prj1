@@ -181,16 +181,12 @@ void findPayments(char *user_input, table *hash_table){
           return;
         }
       }
-      else
-      {
-        //If an empty cell was found, before finding the walletID, it means it doesn't exist
-        printf("The wallet %s either doesn't exist or it hasn't received any money\n", walletID);
-        return;
-      }
     }
 
     buc = buc->next;
   }
+
+  printf("The wallet %s either doesn't exist or it hasn't made any payments\n", walletID);
 }
 
 int checkFind(char *input, char *walletID, int *minutes, int *hours, int *day, int*month, int *year){

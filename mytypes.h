@@ -31,6 +31,7 @@ typedef struct wallet{
 
 typedef struct transaction_info{
   char transactionID[50];
+  char sender[50];
   int value, day, month, year, hours, minutes;
 } transaction_info;
 

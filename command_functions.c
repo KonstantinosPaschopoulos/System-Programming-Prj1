@@ -71,12 +71,14 @@ int get_command(char *input){
 
 void findEarnings(char *user_input, table *hash_table){
   char walletID[50];
-  int minutes, hours, day, month, year, pos, i, comm;
+  int time1, day1, month1, year1, pos, i, comm;
+  int time2, day2, month2, year2;
+  int time;
   transaction *trans;
   int sum;
   bucket *buc;
 
-  comm = checkFind(user_input, walletID, &minutes, &hours, &day, &month, &year);
+  comm = checkFind(user_input, walletID, &time1, &day1, &month1, &year1, &time2, &day2, &month2, &year2);
 
   if (comm == -1)
   {
@@ -103,11 +105,58 @@ void findEarnings(char *user_input, table *hash_table){
           sum = 0;
           while (trans != NULL)
           {
+            time = (trans->tree->info.hours * 100) + trans->tree->info.minutes;
             //Depending on the syntax of the command, different stuff will have to be done
-            if (comm == 0)
+            if (comm == 1)
             {
-              sum += trans->tree->info.value;
+              if ((time < time1) || (time > time2))
+              {
+                trans = trans->next;
+                continue;
+              }
             }
+            else if (comm == 2)
+            {
+              if (trans->tree->info.year < year1 || trans->tree->info.year > year2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.month < month1 || trans->tree->info.month > month2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.day < day1 || trans->tree->info.day > day2)
+              {
+                trans = trans->next;
+                continue;
+              }
+            }
+            else if (comm == 3)
+            {
+              if ((time < time1) || (time > time2))
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.year < year1 || trans->tree->info.year > year2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.month < month1 || trans->tree->info.month > month2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.day < day1 || trans->tree->info.day > day2)
+              {
+                trans = trans->next;
+                continue;
+              }
+            }
+            sum += trans->tree->info.value;
 
             trans = trans->next;
           }
@@ -115,6 +164,68 @@ void findEarnings(char *user_input, table *hash_table){
 
 
           //Now print all the transactions that are needed
+          trans = buc->entries[i].transactions;
+          while (trans != NULL)
+          {
+            time = (trans->tree->info.hours * 100) + trans->tree->info.minutes;
+
+            if (comm == 1)
+            {
+              if ((time < time1) || (time > time2))
+              {
+                trans = trans->next;
+                continue;
+              }
+            }
+            else if (comm == 2)
+            {
+              if (trans->tree->info.year < year1 || trans->tree->info.year > year2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.month < month1 || trans->tree->info.month > month2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.day < day1 || trans->tree->info.day > day2)
+              {
+                trans = trans->next;
+                continue;
+              }
+            }
+            else if (comm == 3)
+            {
+              if ((time < time1) || (time > time2))
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.year < year1 || trans->tree->info.year > year2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.month < month1 || trans->tree->info.month > month2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.day < day1 || trans->tree->info.day > day2)
+              {
+                trans = trans->next;
+                continue;
+              }
+            }
+
+            printf("%s %s %s %d %d-%d-%d %d:%d\n", trans->tree->info.transactionID,
+                      trans->tree->info.sender, trans->tree->walletID,
+                      trans->tree->info.value, trans->tree->info.day, trans->tree->info.month,
+                      trans->tree->info.year, trans->tree->info.hours, trans->tree->info.minutes);
+
+            trans = trans->next;
+          }
 
           return;
         }
@@ -124,17 +235,19 @@ void findEarnings(char *user_input, table *hash_table){
     buc = buc->next;
   }
 
-  printf("The wallet %s either doesn't exist or it hasn't received any money\n", walletID);
+  printf("The wallet %s either doesn't exist or it hasn't receiven any money\n", walletID);
 }
 
 void findPayments(char *user_input, table *hash_table){
   char walletID[50];
-  int minutes, hours, day, month, year, pos, i, comm;
+  int time1, day1, month1, year1, pos, i, comm;
+  int time2, day2, month2, year2;
+  int time;
   transaction *trans;
   int sum;
   bucket *buc;
 
-  comm = checkFind(user_input, walletID, &minutes, &hours, &day, &month, &year);
+  comm = checkFind(user_input, walletID, &time1, &day1, &month1, &year1, &time2, &day2, &month2, &year2);
 
   if (comm == -1)
   {
@@ -161,18 +274,56 @@ void findPayments(char *user_input, table *hash_table){
           sum = 0;
           while (trans != NULL)
           {
+            time = (trans->tree->info.hours * 100) + trans->tree->info.minutes;
             //Depending on the syntax of the command, different stuff will have to be done
             if (comm == 1)
             {
-
+              if ((time < time1) || (time > time2))
+              {
+                trans = trans->next;
+                continue;
+              }
             }
             else if (comm == 2)
             {
-
+              if (trans->tree->info.year < year1 || trans->tree->info.year > year2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.month < month1 || trans->tree->info.month > month2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.day < day1 || trans->tree->info.day > day2)
+              {
+                trans = trans->next;
+                continue;
+              }
             }
             else if (comm == 3)
             {
-
+              if ((time < time1) || (time > time2))
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.year < year1 || trans->tree->info.year > year2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.month < month1 || trans->tree->info.month > month2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.day < day1 || trans->tree->info.day > day2)
+              {
+                trans = trans->next;
+                continue;
+              }
             }
             sum += trans->tree->info.value;
 
@@ -185,21 +336,60 @@ void findPayments(char *user_input, table *hash_table){
           trans = buc->entries[i].transactions;
           while (trans != NULL)
           {
-            //Depending on the syntax of the command, different stuff will have to be done
+            time = (trans->tree->info.hours * 100) + trans->tree->info.minutes;
+
             if (comm == 1)
             {
-
+              if ((time < time1) || (time > time2))
+              {
+                trans = trans->next;
+                continue;
+              }
             }
             else if (comm == 2)
             {
-
+              if (trans->tree->info.year < year1 || trans->tree->info.year > year2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.month < month1 || trans->tree->info.month > month2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.day < day1 || trans->tree->info.day > day2)
+              {
+                trans = trans->next;
+                continue;
+              }
             }
             else if (comm == 3)
             {
-
+              if ((time < time1) || (time > time2))
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.year < year1 || trans->tree->info.year > year2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.month < month1 || trans->tree->info.month > month2)
+              {
+                trans = trans->next;
+                continue;
+              }
+              if (trans->tree->info.day < day1 || trans->tree->info.day > day2)
+              {
+                trans = trans->next;
+                continue;
+              }
             }
 
-            printf("%s %s %s %d %d-%d-%d %d:%d\n", trans->tree->info.transactionID, walletID, trans->tree->walletID,
+            printf("%s %s %s %d %d-%d-%d %d:%d\n", trans->tree->info.transactionID,
+                      trans->tree->info.sender, trans->tree->walletID,
                       trans->tree->info.value, trans->tree->info.day, trans->tree->info.month,
                       trans->tree->info.year, trans->tree->info.hours, trans->tree->info.minutes);
 
@@ -217,7 +407,7 @@ void findPayments(char *user_input, table *hash_table){
   printf("The wallet %s either doesn't exist or it hasn't made any payments\n", walletID);
 }
 
-int checkFind(char *input, char *walletID, int *minutes, int *hours, int *day, int*month, int *year){
+int checkFind(char *input, char *walletID, int *time1, int *day1, int*month1, int *year1, int *time2, int *day2, int*month2, int *year2){
   char input_copy[MAX_INPUT];
   char array[12][55];
   char* token;
@@ -260,17 +450,32 @@ int checkFind(char *input, char *walletID, int *minutes, int *hours, int *day, i
   else if (i == 6)
   {
     //Gave times
-
+    *time1 = (atoi(array[2]) * 100) + atoi(array[3]);
+    *time2 = (atoi(array[4]) * 100) + atoi(array[5]);
     return 1;
   }
   else if (i == 8)
   {
     //Gave dates
+    *day1 = atoi(array[2]);
+    *month1 = atoi(array[3]);
+    *year1 = atoi(array[4]);
+    *day2 = atoi(array[5]);
+    *month2 = atoi(array[6]);
+    *year2 = atoi(array[7]);
     return 2;
   }
   else if (i == 12)
   {
     //Gave everything
+    *time1 = (atoi(array[2]) * 100) + atoi(array[3]);
+    *day1 = atoi(array[4]);
+    *month1 = atoi(array[5]);
+    *year1 = atoi(array[6]);
+    *time2 = (atoi(array[7]) * 100) + atoi(array[8]);
+    *day2 = atoi(array[9]);
+    *month2 = atoi(array[10]);
+    *year2 = atoi(array[11]);
     return 3;
   }
 

@@ -242,6 +242,7 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
     info.hours = atoi(array[7]);
     info.minutes = atoi(array[8]);
     strcpy(info.transactionID, array[0]);
+    strcpy(info.sender, array[1]);
 
     //Checking if the transaction is valid
     if (checkTransaction(walletList, senderWalletID, receiverWalletID, value) == 0)

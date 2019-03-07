@@ -119,16 +119,12 @@ void findEarnings(char *user_input, table *hash_table){
           return;
         }
       }
-      else
-      {
-        //If an empty cell was found, before finding the walletID, it means it doesn't exist
-        printf("The wallet %s either doesn't exist or it hasn't received any money\n", walletID);
-        return;
-      }
     }
 
     buc = buc->next;
   }
+
+  printf("The wallet %s either doesn't exist or it hasn't received any money\n", walletID);
 }
 
 void findPayments(char *user_input, table *hash_table){
@@ -166,10 +162,19 @@ void findPayments(char *user_input, table *hash_table){
           while (trans != NULL)
           {
             //Depending on the syntax of the command, different stuff will have to be done
-            if (comm == 0)
+            if (comm == 1)
             {
-              sum += trans->tree->info.value;
+
             }
+            else if (comm == 2)
+            {
+
+            }
+            else if (comm == 3)
+            {
+
+            }
+            sum += trans->tree->info.value;
 
             trans = trans->next;
           }
@@ -177,6 +182,29 @@ void findPayments(char *user_input, table *hash_table){
 
 
           //Now print all the transactions that are needed
+          trans = buc->entries[i].transactions;
+          while (trans != NULL)
+          {
+            //Depending on the syntax of the command, different stuff will have to be done
+            if (comm == 1)
+            {
+
+            }
+            else if (comm == 2)
+            {
+
+            }
+            else if (comm == 3)
+            {
+
+            }
+
+            printf("%s %s %s %d %d-%d-%d %d:%d\n", trans->tree->info.transactionID, walletID, trans->tree->walletID,
+                      trans->tree->info.value, trans->tree->info.day, trans->tree->info.month,
+                      trans->tree->info.year, trans->tree->info.hours, trans->tree->info.minutes);
+
+            trans = trans->next;
+          }
 
           return;
         }

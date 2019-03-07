@@ -226,7 +226,10 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
     //Using strtok to tokenize every line before the final extraction
     for (token = strtok(whole_line, delimiters), i = 0; token; token = strtok(NULL, delimiters), i++)
     {
-      strcpy(array[i], token);
+      if (i < 9)
+      {
+        strcpy(array[i], token);
+      }
     }
 
     //Assigning the correct value to each variable
@@ -292,6 +295,12 @@ int checkTransaction(wallet *walletList, char *senderWalletID, char *receiverWal
   wallet_node *curr = walletList->nodes;
   int sum = 0, flag = 0;
   leaf *coin;
+
+  if (value == 0)
+  {
+    printf("There is no point in transfering 0$. ");
+    return 0;
+  }
 
   if (strcmp(senderWalletID, receiverWalletID) == 0)
   {
@@ -364,7 +373,7 @@ int hash_function(char *id, int range){
 void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, int bucketSize, transaction_info t_i){
   int buc, i, flag, remainder = t_i.value, place, old_value;
   bucket *b, *prev, *temp;
-  transaction *trans, *curr_trans;
+  transaction *trans, *curr_trans, *transa;
   wallet_node *curr_wall;
   leaf *coin;
 
@@ -476,7 +485,8 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     strcpy(temp->entries[0].walletID, senderWalletID);
     temp->entries[0].transactions = NULL;
 
-    b = prev->next = temp;  //Adding the overflow bucket after the last full bucket
+    prev->next = temp;  //Adding the overflow bucket after the last full bucket
+    b = prev->next;
     place = 0;
   }
 
@@ -704,14 +714,28 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     strcpy(temp->entries[0].walletID, receiverWalletID);
     temp->entries[0].transactions = NULL;
 
-    b = prev->next = temp;  //Adding the overflow bucket after the last full bucket
+    prev->next = temp;  //Adding the overflow bucket after the last full bucket
+    b = prev->next;
     place = 0;
   }
+
+  // memcpy(transa, trans, sizeof);
+
+  //Copying the contents of the transaction to a new transaction that's going to be added
+  //to the receivers hash table
+  transa = (transaction*)malloc(sizeof(transaction));
+  if (transa == NULL)
+  {
+    perror("Malloc failed");
+    exit(0);
+  }
+
+  *transa = *trans;
 
   //Adding the new transaction to the bucket b at the place that was found, at the end of the list
   if (b->entries[place].transactions == NULL)
   {
-    b->entries[place].transactions = trans;
+    b->entries[place].transactions = transa;
   }
   else
   {
@@ -721,7 +745,7 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
       curr_trans = curr_trans->next;
     }
 
-    curr_trans->next = trans;
+    curr_trans->next = transa;
   }
 }
 

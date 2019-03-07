@@ -69,6 +69,191 @@ int get_command(char *input){
   return 0;
 }
 
+void findEarnings(char *user_input, table *hash_table){
+  char walletID[50];
+  int minutes, hours, day, month, year, pos, i, comm;
+  transaction *trans;
+  int sum;
+  bucket *buc;
+
+  comm = checkFind(user_input, walletID, &minutes, &hours, &day, &month, &year);
+
+  if (comm == -1)
+  {
+    printf("Invalid command\n");
+    return;
+  }
+
+  //Using the hash function to go to the correct bucket
+  pos = hash_function(walletID, hash_table->size);
+  buc = hash_table->h_table[pos];
+
+  //Iterate through the bucket and the overflow buckets, if they exist
+  while (buc != NULL)
+  {
+    for (i = 0; i < buc->size; i++)
+    {
+      if (buc->entries[i].empty == 0)
+      {
+        //Finding the correct entry
+        if (strcmp(buc->entries[i].walletID, walletID) == 0)
+        {
+          //Calculate how much money have been transfered to the wallet in total
+          trans = buc->entries[i].transactions;
+          sum = 0;
+          while (trans != NULL)
+          {
+            //Depending on the syntax of the command, different stuff will have to be done
+            if (comm == 0)
+            {
+              sum += trans->tree->info.value;
+            }
+
+            trans = trans->next;
+          }
+          printf("The wallet %s has received %d$\n", walletID, sum);
+
+
+          //Now print all the transactions that are needed
+
+          return;
+        }
+      }
+      else
+      {
+        //If an empty cell was found, before finding the walletID, it means it doesn't exist
+        printf("The wallet %s either doesn't exist or it hasn't received any money\n", walletID);
+        return;
+      }
+    }
+
+    buc = buc->next;
+  }
+}
+
+void findPayments(char *user_input, table *hash_table){
+  char walletID[50];
+  int minutes, hours, day, month, year, pos, i, comm;
+  transaction *trans;
+  int sum;
+  bucket *buc;
+
+  comm = checkFind(user_input, walletID, &minutes, &hours, &day, &month, &year);
+
+  if (comm == -1)
+  {
+    printf("Invalid command\n");
+    return;
+  }
+
+  //Using the hash function to go to the correct bucket
+  pos = hash_function(walletID, hash_table->size);
+  buc = hash_table->h_table[pos];
+
+  //Iterate through the bucket and the overflow buckets, if they exist
+  while (buc != NULL)
+  {
+    for (i = 0; i < buc->size; i++)
+    {
+      if (buc->entries[i].empty == 0)
+      {
+        //Finding the correct entry
+        if (strcmp(buc->entries[i].walletID, walletID) == 0)
+        {
+          //Calculate how much money have been transfered to the wallet in total
+          trans = buc->entries[i].transactions;
+          sum = 0;
+          while (trans != NULL)
+          {
+            //Depending on the syntax of the command, different stuff will have to be done
+            if (comm == 0)
+            {
+              sum += trans->tree->info.value;
+            }
+
+            trans = trans->next;
+          }
+          printf("The wallet %s has paid %d$\n", walletID, sum);
+
+
+          //Now print all the transactions that are needed
+
+          return;
+        }
+      }
+      else
+      {
+        //If an empty cell was found, before finding the walletID, it means it doesn't exist
+        printf("The wallet %s either doesn't exist or it hasn't received any money\n", walletID);
+        return;
+      }
+    }
+
+    buc = buc->next;
+  }
+}
+
+int checkFind(char *input, char *walletID, int *minutes, int *hours, int *day, int*month, int *year){
+  char input_copy[MAX_INPUT];
+  char array[12][55];
+  char* token;
+  char delimiters[] = " -:";
+  int i, flag = 0;
+
+  strcpy(input_copy, input);
+
+  for (i = 0; i < (int)strlen(input_copy); i++)
+  {
+    if ((input_copy[i] == ':') || (input_copy[i] == '-'))
+    {
+      flag++;
+    }
+  }
+  if ((flag % 2) != 0)
+  {
+    return -1;
+  }
+
+  for (token = strtok(input_copy, delimiters), i = 0; token; token = strtok(NULL, delimiters), i++)
+  {
+    if (i < 12)
+    {
+      strcpy(array[i], token);
+    }
+    else
+    {
+      return -1;
+    }
+  }
+
+  strcpy(walletID, array[1]);
+
+  if (i == 2)
+  {
+    //Gave only the command
+    return 0;
+  }
+  else if (i == 6)
+  {
+    //Gave times
+
+    return 1;
+  }
+  else if (i == 8)
+  {
+    //Gave dates
+    return 2;
+  }
+  else if (i == 12)
+  {
+    //Gave everything
+    return 3;
+  }
+
+
+  return -1;
+}
+
 void walletStatus(wallet *walletList, char *walletID){
   wallet_node *curr;
   leaf *coin;

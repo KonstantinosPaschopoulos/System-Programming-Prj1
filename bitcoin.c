@@ -141,11 +141,16 @@ int main(int argc, char **argv){
       case 3:
         break;
       case 4:
+        //findEarnings
+        findEarnings(user_input, receiverHashtable);
         break;
       case 5:
+        //findPayments
+        findPayments(user_input, senderHashtable);
         break;
       case 6:
         //walletStatus
+        // TODO better checks for numbers of strings
         sscanf(user_input, "%s %s", command, walletID);
         walletStatus(walletList, walletID);
         break;

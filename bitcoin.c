@@ -117,7 +117,7 @@ int main(int argc, char **argv){
   table *receiverHashtable = hash_init(receiverHashtableNumOfEntries, bucketSize);
 
   //Parsing the initial transactions
-  readTransactions(transactionsFile, walletList, senderHashtable, receiverHashtable, bucketSize);
+  readTransactions(transactionsFile, walletList, senderHashtable, receiverHashtable);
 
   //After all the data structures are set, the program is ready to get input from the user
   flag = 1;

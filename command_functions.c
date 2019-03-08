@@ -70,7 +70,7 @@ int get_command(char *input){
   return 0;
 }
 
-void requestTransaction(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable){
+int requestTransaction(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable){
   char *token;
   char delimiters[] = " -:", input_copy[MAX_INPUT], receiverWalletID[50];
   transaction_info info;
@@ -120,14 +120,14 @@ void requestTransaction(char *user_input, wallet *walletList, table *senderHasht
   else
   {
     printf("Wrong command syntax. Invalid transaction.\n");
-    return;
+    return -1;
   }
 
   //Checking if the transaction is valid
   if (checkTransaction(walletList, info.sender, receiverWalletID, info.value) == 0)
   {
     printf("Invalid transaction.\n");
-    return;
+    return -1;
   }
 
   //TODO Generating a new unique transactionID
@@ -135,10 +135,107 @@ void requestTransaction(char *user_input, wallet *walletList, table *senderHasht
 
   //Adding the transaction to the system
   enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
+
+  return 1;
 }
 
 void requestTransactions(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable){
+  char whole_line[MAX_INPUT];
+  char *token;
+  char delimiters[] = " -:", input_copy[MAX_INPUT], receiverWalletID[50];
+  transaction_info info;
+  int i;
+  char array[8][55];
+  time_t t = time(NULL);
+  struct tm tm = *localtime(&t);
 
+  //Calling requestTransaction to deal with the first line
+  user_input[strlen(user_input) - 1] = '\0';
+  if (requestTransaction(user_input, walletList, senderHashtable, receiverHashtable) == -1)
+  {
+    return;
+  }
+
+  //Using fgets to get the rest of the user's commands
+  while (fgets(whole_line, MAX_INPUT, stdin))
+  {
+    //The user must type /exit to exit this command
+    if (strcmp(whole_line, "/exit\n") == 0)
+    {
+      printf("Exiting requestTransactions.\n");
+      return;
+    }
+
+    if ((strlen(whole_line) > 0) && (whole_line[strlen(whole_line) - 1] == '\n'))
+    {
+      //Making sure the each line ends with a semicolon
+      if (whole_line[strlen(whole_line) - 2] != ';')
+      {
+        printf("Wrong command syntax.\n");
+        return;
+      }
+      whole_line[strlen(whole_line) - 2] = '\0';
+    }
+
+    /////////
+
+    strcpy(input_copy, whole_line);
+
+    //Using strtok to tokenize the input
+    for (token = strtok(input_copy, delimiters), i = 0; token; token = strtok(NULL, delimiters), i++)
+    {
+      if (i < 8)
+      {
+        strcpy(array[i], token);
+      }
+    }
+
+    strcpy(info.sender, array[0]);
+    strcpy(receiverWalletID, array[1]);
+    info.value = atoi(array[2]);
+
+    if (i == 8)
+    {
+      //The user gave the time and date
+      info.day = atoi(array[3]);
+      info.month = atoi(array[4]);
+      info.year = atoi(array[5]);
+      info.hours = atoi(array[6]);
+      info.minutes = atoi(array[7]);
+
+      //TODO Checking if the given time and date are acceptable
+
+    }
+    else if (i == 3)
+    {
+      //Use current the current time and date
+      info.day = tm.tm_mday;
+      info.month = tm.tm_mon + 1;
+      info.year = tm.tm_year + 1900;
+      info.hours = tm.tm_hour;
+      info.minutes = tm.tm_min;
+
+      //TODO Checking if the given time and date are acceptable
+    }
+    else
+    {
+      printf("Wrong command syntax. Invalid transaction.\n");
+      return;
+    }
+
+    //Checking if the transaction is valid
+    if (checkTransaction(walletList, info.sender, receiverWalletID, info.value) == 0)
+    {
+      printf("Invalid transaction.\n");
+      return;
+    }
+
+    //TODO Generating a new unique transactionID
+    // strcpy(info.transactionID, array[0]);
+
+    //Adding the transaction to the system
+    enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
+  }
 }
 
 void findEarnings(char *user_input, table *hash_table){

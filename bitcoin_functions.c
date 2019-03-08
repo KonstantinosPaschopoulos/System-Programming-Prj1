@@ -180,7 +180,7 @@ void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletLis
   }
 }
 
-table* hash_init(int num_entries){
+table* hash_init(int num_entries, int bucketSize){
   int i;
 
   table *hash_table = (table*)malloc(sizeof(table));
@@ -191,6 +191,7 @@ table* hash_init(int num_entries){
   }
 
   hash_table->size = num_entries;
+  hash_table->bucket_size = bucketSize;
 
   hash_table->h_table = (bucket**)malloc(num_entries * sizeof(bucket*));
   if (hash_table->h_table == NULL)
@@ -207,7 +208,7 @@ table* hash_init(int num_entries){
   return hash_table;
 }
 
-void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHashtable, table *receiverHashtable, int bucketSize){
+void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHashtable, table *receiverHashtable){
   int value, i;
   char whole_line[250], senderWalletID[50], receiverWalletID[50];
   char array[9][55];
@@ -257,7 +258,7 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
       continue;
     }
 
-    enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, bucketSize, info);
+    enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
   }
 }
 
@@ -371,8 +372,8 @@ int hash_function(char *id, int range){
   return (value % range);
 }
 
-void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, int bucketSize, transaction_info t_i){
-  int buc, i, flag, remainder = t_i.value, place, old_value;
+void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiverWalletID, table *receiverHashtable, wallet *walletList, transaction_info t_i){
+  int buc, i, flag, remainder = t_i.value, place, old_value, bucketSize = senderHashtable->bucket_size;
   bucket *b, *prev, *temp;
   transaction *trans, *curr_trans, *transa;
   wallet_node *curr_wall;

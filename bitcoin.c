@@ -113,8 +113,8 @@ int main(int argc, char **argv){
   readBalances(bitCoinBalancesFile, bitcoinList, walletList, bitCoinValue);
 
   //After the balances have been read it's time to parse the transactions file
-  table *senderHashtable = hash_init(senderHashtableNumOfEntries);
-  table *receiverHashtable = hash_init(receiverHashtableNumOfEntries);
+  table *senderHashtable = hash_init(senderHashtableNumOfEntries, bucketSize);
+  table *receiverHashtable = hash_init(receiverHashtableNumOfEntries, bucketSize);
 
   //Parsing the initial transactions
   readTransactions(transactionsFile, walletList, senderHashtable, receiverHashtable, bucketSize);
@@ -135,10 +135,14 @@ int main(int argc, char **argv){
     switch (get_command(user_input))
     {
       case 1:
+        //requestTransaction
+        requestTransaction(user_input, walletList, senderHashtable, receiverHashtable);
         break;
       case 2:
+        //requestTransactions
         break;
       case 3:
+        //requestTransactions using a file
         break;
       case 4:
         //findEarnings

@@ -57,6 +57,7 @@ typedef struct bucket_cell{
 
 typedef struct table {
   int size;
+  int bucket_size;
   bucket **h_table;
 } table;
 

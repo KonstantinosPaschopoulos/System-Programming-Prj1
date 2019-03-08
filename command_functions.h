@@ -2,6 +2,7 @@
 
 int get_command(char *);
 void requestTransaction(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable);
+void requestTransactions(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable);
 void findEarnings(char *, table *);
 void findPayments(char *, table *);
 int checkFind(char *, char *, int *, int*, int *, int *, int *, int *, int*, int *);

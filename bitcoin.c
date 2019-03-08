@@ -140,6 +140,7 @@ int main(int argc, char **argv){
         break;
       case 2:
         //requestTransactions
+        requestTransactions(user_input, walletList, senderHashtable, receiverHashtable);
         break;
       case 3:
         //requestTransactions using a file

@@ -71,24 +71,73 @@ int get_command(char *input){
 }
 
 void requestTransaction(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable){
-  // char* token;
-  // char delimiters[] = " -:";
-  // transaction_info info;
-  //
-  // //Using strtok to tokenize every line before the final extraction
-  // for (token = strtok(whole_line, delimiters), i = 0; token; token = strtok(NULL, delimiters), i++)
-  // {
-  //   if (i < 9)
-  //   {
-  //     strcpy(array[i], token);
-  //   }
-  // }
-
+  char *token;
+  char delimiters[] = " -:", input_copy[MAX_INPUT], receiverWalletID[50];
+  transaction_info info;
+  int i;
+  char array[9][55];
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
 
-  printf("now: %d-%d-%d %d:%d:%d\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+  strcpy(input_copy, user_input);
 
+  //Using strtok to tokenize the input
+  for (token = strtok(input_copy, delimiters), i = 0; token; token = strtok(NULL, delimiters), i++)
+  {
+    if (i < 9)
+    {
+      strcpy(array[i], token);
+    }
+  }
+
+  strcpy(info.sender, array[1]);
+  strcpy(receiverWalletID, array[2]);
+  info.value = atoi(array[3]);
+
+  if (i == 9)
+  {
+    //The user gave the time and date
+    info.day = atoi(array[4]);
+    info.month = atoi(array[5]);
+    info.year = atoi(array[6]);
+    info.hours = atoi(array[7]);
+    info.minutes = atoi(array[8]);
+
+    //TODO Checking if the given time and date are acceptable
+
+  }
+  else if (i == 4)
+  {
+    //Use current the current time and date
+    info.day = tm.tm_mday;
+    info.month = tm.tm_mon + 1;
+    info.year = tm.tm_year + 1900;
+    info.hours = tm.tm_hour;
+    info.minutes = tm.tm_min;
+
+    //TODO Checking if the given time and date are acceptable
+  }
+  else
+  {
+    printf("Wrong command syntax. Invalid transaction.\n");
+    return;
+  }
+
+  //Checking if the transaction is valid
+  if (checkTransaction(walletList, info.sender, receiverWalletID, info.value) == 0)
+  {
+    printf("Invalid transaction.\n");
+    return;
+  }
+
+  //TODO Generating a new unique transactionID
+  // strcpy(info.transactionID, array[0]);
+
+  //Adding the transaction to the system
+  enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
+}
+
+void requestTransactions(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable){
 
 }
 

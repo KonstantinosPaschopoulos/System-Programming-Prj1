@@ -192,6 +192,7 @@ table* hash_init(int num_entries, int bucketSize){
 
   hash_table->size = num_entries;
   hash_table->bucket_size = bucketSize;
+  strcpy(hash_table->greatestWalletID, "");
 
   hash_table->h_table = (bucket**)malloc(num_entries * sizeof(bucket*));
   if (hash_table->h_table == NULL)
@@ -378,6 +379,12 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
   transaction *trans, *curr_trans, *transa;
   wallet_node *curr_wall;
   leaf *coin;
+
+  if (strcmp(t_i.transactionID, senderHashtable->greatestWalletID) > 0)
+  {
+    strcpy(senderHashtable->greatestWalletID, t_i.transactionID);
+    strcpy(receiverHashtable->greatestWalletID, t_i.transactionID);
+  }
 
   //Updating the senderHashtable first
   buc = hash_function(senderWalletID, senderHashtable->size);

@@ -71,7 +71,7 @@ int get_command(char *input){
 }
 
 int requestTransaction(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable){
-  char *token;
+  char *token, *temp;
   char delimiters[] = " -:", input_copy[MAX_INPUT], receiverWalletID[50];
   transaction_info info;
   int i;
@@ -130,8 +130,9 @@ int requestTransaction(char *user_input, wallet *walletList, table *senderHashta
     return -1;
   }
 
-  //TODO Generating a new unique transactionID
-  // strcpy(info.transactionID, array[0]);
+  //Generating a new unique transactionID
+  temp = uniqueID(senderHashtable->greatestWalletID);
+  strcpy(info.transactionID, temp);
 
   //Adding the transaction to the system
   enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
@@ -141,7 +142,7 @@ int requestTransaction(char *user_input, wallet *walletList, table *senderHashta
 
 void requestTransactions(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable){
   char whole_line[MAX_INPUT];
-  char *token;
+  char *token, *temp;
   char delimiters[] = " -:", input_copy[MAX_INPUT], receiverWalletID[50];
   transaction_info info;
   int i;
@@ -176,8 +177,6 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
       }
       whole_line[strlen(whole_line) - 2] = '\0';
     }
-
-    /////////
 
     strcpy(input_copy, whole_line);
 
@@ -230,12 +229,35 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
       return;
     }
 
-    //TODO Generating a new unique transactionID
-    // strcpy(info.transactionID, array[0]);
+    //Generating a new unique transactionID
+    temp = uniqueID(senderHashtable->greatestWalletID);
+    strcpy(info.transactionID, temp);
 
     //Adding the transaction to the system
     enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
   }
+}
+
+char *uniqueID(char *latest){
+  int i;
+  char randomCharacters[] = "abcefghijklmonpqstuvwxyz1234567890ABCDEFGHIJKLMONPQSTYVWXYZ!@#$%^&*";
+  char *newID = (char*)malloc(50 * sizeof(char));
+  if (newID == NULL)
+  {
+    perror("Malloc failed");
+    exit(0);
+  }
+
+  //Creating random strings until one of them is greater than the greatest transactionID
+  do {
+    for (i = 0; i < 50; i++)
+    {
+      newID[i] = randomCharacters[rand() % (sizeof(randomCharacters) - 1)];
+    }
+    newID[49] = '\0';
+  } while (strcmp(newID, latest) < 1);
+
+  return newID;
 }
 
 void findEarnings(char *user_input, table *hash_table){

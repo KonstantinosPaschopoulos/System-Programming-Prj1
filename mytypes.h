@@ -58,7 +58,7 @@ typedef struct bucket_cell{
 typedef struct table {
   int size;
   int bucket_size;
-  // char greatestWalletID[50];
+  char greatestWalletID[50];
   // int latestTime;
   bucket **h_table;
 } table;

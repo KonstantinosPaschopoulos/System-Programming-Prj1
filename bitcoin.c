@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "mytypes.h"
 #include "bitcoin_functions.h"
 #include "command_functions.h"
@@ -121,6 +122,7 @@ int main(int argc, char **argv){
 
   //After all the data structures are set, the program is ready to get input from the user
   flag = 1;
+  srand(time(NULL));
   while (flag != 0)
   {
     printf("\n");

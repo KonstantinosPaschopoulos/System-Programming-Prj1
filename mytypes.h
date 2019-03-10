@@ -1,3 +1,5 @@
+#include <time.h>
+
 #ifndef MYTYPES_H
 #define MYTYPES_H
 
@@ -58,8 +60,7 @@ typedef struct bucket_cell{
 typedef struct table {
   int size;
   int bucket_size;
-  char greatestWalletID[50];
-  // int latestTime;
+  char greatestTransactionID[50];  //Using this variable to store the currently greatest transactionID
   bucket **h_table;
 } table;
 

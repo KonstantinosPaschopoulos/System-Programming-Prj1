@@ -131,7 +131,7 @@ int requestTransaction(char *user_input, wallet *walletList, table *senderHashta
   }
 
   //Generating a new unique transactionID
-  temp = uniqueID(senderHashtable->greatestWalletID);
+  temp = uniqueID(senderHashtable->greatestTransactionID);
   strcpy(info.transactionID, temp);
 
   //Adding the transaction to the system
@@ -230,7 +230,7 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
     }
 
     //Generating a new unique transactionID
-    temp = uniqueID(senderHashtable->greatestWalletID);
+    temp = uniqueID(senderHashtable->greatestTransactionID);
     strcpy(info.transactionID, temp);
 
     //Adding the transaction to the system

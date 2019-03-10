@@ -192,7 +192,7 @@ table* hash_init(int num_entries, int bucketSize){
 
   hash_table->size = num_entries;
   hash_table->bucket_size = bucketSize;
-  strcpy(hash_table->greatestWalletID, "");
+  strcpy(hash_table->greatestTransactionID, "");
 
   hash_table->h_table = (bucket**)malloc(num_entries * sizeof(bucket*));
   if (hash_table->h_table == NULL)
@@ -380,10 +380,11 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
   wallet_node *curr_wall;
   leaf *coin;
 
-  if (strcmp(t_i.transactionID, senderHashtable->greatestWalletID) > 0)
+  //Updating the tables with the greatest transactionID yet
+  if (strcmp(t_i.transactionID, senderHashtable->greatestTransactionID) > 0)
   {
-    strcpy(senderHashtable->greatestWalletID, t_i.transactionID);
-    strcpy(receiverHashtable->greatestWalletID, t_i.transactionID);
+    strcpy(senderHashtable->greatestTransactionID, t_i.transactionID);
+    strcpy(receiverHashtable->greatestTransactionID, t_i.transactionID);
   }
 
   //Updating the senderHashtable first
@@ -518,6 +519,12 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
       coin = curr_wall->bitcoins;
       while (coin != NULL)
       {
+        if (coin->balance->value <= 0)
+        {
+          coin = coin->next;
+          continue;
+        }
+
         old_value = coin->balance->value;
 
         //Updating the bitcoin's tree

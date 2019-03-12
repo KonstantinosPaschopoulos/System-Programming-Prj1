@@ -75,6 +75,7 @@ int requestTransaction(char *user_input, wallet *walletList, table *senderHashta
   char delimiters[] = " -:", input_copy[MAX_INPUT], receiverWalletID[50];
   transaction_info info;
   int i;
+  long int epoch;
   char array[9][55];
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
@@ -103,8 +104,19 @@ int requestTransaction(char *user_input, wallet *walletList, table *senderHashta
     info.hours = atoi(array[7]);
     info.minutes = atoi(array[8]);
 
-    //TODO Checking if the given time and date are acceptable
+    //Checking if the given time and date are acceptable
+    epoch = getUnixTime(info.year, info.month, info.day, info.hours, info.minutes);
 
+    if (epoch > senderHashtable->latestTransaction)
+    {
+      senderHashtable->latestTransaction = epoch;
+      receiverHashtable->latestTransaction = epoch;
+    }
+    else
+    {
+      printf("The transaction should be older than the current oldest transaction.\n");
+      return -1;
+    }
   }
   else if (i == 4)
   {
@@ -115,7 +127,19 @@ int requestTransaction(char *user_input, wallet *walletList, table *senderHashta
     info.hours = tm.tm_hour;
     info.minutes = tm.tm_min;
 
-    //TODO Checking if the given time and date are acceptable
+    //Checking if the given time and date are acceptable
+    epoch = getUnixTime(info.year, info.month, info.day, info.hours, info.minutes);
+
+    if (epoch > senderHashtable->latestTransaction)
+    {
+      senderHashtable->latestTransaction = epoch;
+      receiverHashtable->latestTransaction = epoch;
+    }
+    else
+    {
+      printf("The transaction should be older than the current oldest transaction. Invalid transaction.\n");
+      return -1;
+    }
   }
   else
   {
@@ -147,6 +171,7 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
   char delimiters[] = " -:", input_copy[MAX_INPUT], receiverWalletID[50];
   transaction_info info;
   int i;
+  long int epoch;
   char array[8][55];
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
@@ -203,8 +228,19 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
       info.hours = atoi(array[6]);
       info.minutes = atoi(array[7]);
 
-      //TODO Checking if the given time and date are acceptable
+      //Checking if the given time and date are acceptable
+      epoch = getUnixTime(info.year, info.month, info.day, info.hours, info.minutes);
 
+      if (epoch > senderHashtable->latestTransaction)
+      {
+        senderHashtable->latestTransaction = epoch;
+        receiverHashtable->latestTransaction = epoch;
+      }
+      else
+      {
+        printf("The transaction should be older than the current oldest transaction. Skipping the transaction!\n");
+        continue;
+      }
     }
     else if (i == 3)
     {
@@ -215,7 +251,19 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
       info.hours = tm.tm_hour;
       info.minutes = tm.tm_min;
 
-      //TODO Checking if the given time and date are acceptable
+      //Checking if the given time and date are acceptable
+      epoch = getUnixTime(info.year, info.month, info.day, info.hours, info.minutes);
+
+      if (epoch > senderHashtable->latestTransaction)
+      {
+        senderHashtable->latestTransaction = epoch;
+        receiverHashtable->latestTransaction = epoch;
+      }
+      else
+      {
+        printf("The transaction should be older than the current oldest transaction. Skipping the transaction!\n");
+        continue;
+      }
     }
     else
     {
@@ -247,6 +295,7 @@ void requestTransactionsFile(char *user_input, wallet *walletList, table *sender
   char delimiters[] = " -:";
   transaction_info info;
   int i;
+  long int epoch;
   char array[8][55];
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
@@ -298,7 +347,19 @@ void requestTransactionsFile(char *user_input, wallet *walletList, table *sender
       info.hours = atoi(array[6]);
       info.minutes = atoi(array[7]);
 
-      //TODO Checking if the given time and date are acceptable
+      //Checking if the given time and date are acceptable
+      epoch = getUnixTime(info.year, info.month, info.day, info.hours, info.minutes);
+
+      if (epoch > senderHashtable->latestTransaction)
+      {
+        senderHashtable->latestTransaction = epoch;
+        receiverHashtable->latestTransaction = epoch;
+      }
+      else
+      {
+        printf("The transaction should be older than the current oldest transaction. Skipping the transaction!\n");
+        continue;
+      }
 
     }
     else if (i == 3)
@@ -310,7 +371,19 @@ void requestTransactionsFile(char *user_input, wallet *walletList, table *sender
       info.hours = tm.tm_hour;
       info.minutes = tm.tm_min;
 
-      //TODO Checking if the given time and date are acceptable
+      //Checking if the given time and date are acceptable
+      epoch = getUnixTime(info.year, info.month, info.day, info.hours, info.minutes);
+
+      if (epoch > senderHashtable->latestTransaction)
+      {
+        senderHashtable->latestTransaction = epoch;
+        receiverHashtable->latestTransaction = epoch;
+      }
+      else
+      {
+        printf("The transaction should be older than the current oldest transaction. Skipping the transaction!\n");
+        continue;
+      }
     }
     else
     {

@@ -146,6 +146,7 @@ int main(int argc, char **argv){
         break;
       case 3:
         //requestTransactions using a file
+        requestTransactionsFile(user_input, walletList, senderHashtable, receiverHashtable);
         break;
       case 4:
         //findEarnings

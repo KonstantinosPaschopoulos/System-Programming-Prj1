@@ -1,8 +1,9 @@
 #include "mytypes.h"
 
 int get_command(char *);
-int requestTransaction(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable);
-void requestTransactions(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable);
+int requestTransaction(char *, wallet *, table *, table *);
+void requestTransactions(char *, wallet *, table *, table *);
+void requestTransactionsFile(char *, wallet *, table *, table *);
 void findEarnings(char *, table *);
 char *uniqueID(char *);
 void findPayments(char *, table *);

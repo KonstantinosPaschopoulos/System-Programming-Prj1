@@ -136,6 +136,7 @@ int requestTransaction(char *user_input, wallet *walletList, table *senderHashta
 
   //Adding the transaction to the system
   enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
+  printf("Done!\n");
 
   return 1;
 }
@@ -150,11 +151,11 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
 
-  //Calling requestTransaction to deal with the first line
+  //Calling requestTransaction to deal with the first transaction
   user_input[strlen(user_input) - 1] = '\0';
   if (requestTransaction(user_input, walletList, senderHashtable, receiverHashtable) == -1)
   {
-    return;
+    printf("Skipping the transaction!\n");
   }
 
   //Using fgets to get the rest of the user's commands
@@ -172,8 +173,8 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
       //Making sure the each line ends with a semicolon
       if (whole_line[strlen(whole_line) - 2] != ';')
       {
-        printf("Wrong command syntax.\n");
-        return;
+        printf("Wrong command syntax. Skipping the transaction!\n");
+        continue;
       }
       whole_line[strlen(whole_line) - 2] = '\0';
     }
@@ -218,15 +219,15 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
     }
     else
     {
-      printf("Wrong command syntax. Invalid transaction.\n");
-      return;
+      printf("Wrong command syntax. Skipping the transaction!\n");
+      continue;
     }
 
     //Checking if the transaction is valid
     if (checkTransaction(walletList, info.sender, receiverWalletID, info.value) == 0)
     {
-      printf("Invalid transaction.\n");
-      return;
+      printf("Invalid transaction. Skipping the transaction!\n");
+      continue;
     }
 
     //Generating a new unique transactionID
@@ -235,12 +236,110 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
 
     //Adding the transaction to the system
     enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
+    printf("Done!\n");
   }
+}
+
+void requestTransactionsFile(char *user_input, wallet *walletList, table *senderHashtable, table *receiverHashtable){
+  FILE *input = NULL;
+  char command[50], input_file[50], whole_line[MAX_INPUT], input_copy[MAX_INPUT], receiverWalletID[50];
+  char *token, *temp;
+  char delimiters[] = " -:";
+  transaction_info info;
+  int i;
+  char array[8][55];
+  time_t t = time(NULL);
+  struct tm tm = *localtime(&t);
+
+  sscanf(user_input, "%s %s", command, input_file);
+
+  input = fopen(input_file, "r");
+  if (input == NULL)
+  {
+    perror("Could not open the input file");
+    return;
+  }
+
+  //Using fgets to get the rest of the user's commands
+  while (fgets(whole_line, MAX_INPUT, input))
+  {
+    if ((strlen(whole_line) > 0) && (whole_line[strlen(whole_line) - 1] == '\n'))
+    {
+      //Making sure the each line ends with a semicolon
+      if (whole_line[strlen(whole_line) - 2] != ';')
+      {
+        printf("Wrong command syntax. Skipping the transaction!\n");
+        continue;
+      }
+      whole_line[strlen(whole_line) - 2] = '\0';
+    }
+
+    strcpy(input_copy, whole_line);
+
+    //Using strtok to tokenize the input
+    for (token = strtok(input_copy, delimiters), i = 0; token; token = strtok(NULL, delimiters), i++)
+    {
+      if (i < 8)
+      {
+        strcpy(array[i], token);
+      }
+    }
+
+    strcpy(info.sender, array[0]);
+    strcpy(receiverWalletID, array[1]);
+    info.value = atoi(array[2]);
+
+    if (i == 8)
+    {
+      //The user gave the time and date
+      info.day = atoi(array[3]);
+      info.month = atoi(array[4]);
+      info.year = atoi(array[5]);
+      info.hours = atoi(array[6]);
+      info.minutes = atoi(array[7]);
+
+      //TODO Checking if the given time and date are acceptable
+
+    }
+    else if (i == 3)
+    {
+      //Use current the current time and date
+      info.day = tm.tm_mday;
+      info.month = tm.tm_mon + 1;
+      info.year = tm.tm_year + 1900;
+      info.hours = tm.tm_hour;
+      info.minutes = tm.tm_min;
+
+      //TODO Checking if the given time and date are acceptable
+    }
+    else
+    {
+      printf("Wrong command syntax. Skipping the transaction!\n");
+      continue;
+    }
+
+    //Checking if the transaction is valid
+    if (checkTransaction(walletList, info.sender, receiverWalletID, info.value) == 0)
+    {
+      printf("Invalid transaction. Skipping the transaction!\n");
+      continue;
+    }
+
+    //Generating a new unique transactionID
+    temp = uniqueID(senderHashtable->greatestTransactionID);
+    strcpy(info.transactionID, temp);
+
+    //Adding the transaction to the system
+    enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
+    printf("Done!\n");
+  }
+
+  fclose(input);
 }
 
 char *uniqueID(char *latest){
   int i;
-  char randomCharacters[] = "abcefghijklmonpqstuvwxyz1234567890ABCDEFGHIJKLMONPQSTYVWXYZ!@#$%^&*";
+  char randomCharacters[] = "abcefghijklmonpqstuvwxyz1234567890ABCDEFGHIJKLMONPQSTYVWXYZ";
   char *newID = (char*)malloc(50 * sizeof(char));
   if (newID == NULL)
   {

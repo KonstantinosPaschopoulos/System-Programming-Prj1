@@ -261,6 +261,8 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
 
     enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
   }
+
+  fclose(transactionsFile);
 }
 
 int checkTransactionID(char *transactionID, table *hash_t){

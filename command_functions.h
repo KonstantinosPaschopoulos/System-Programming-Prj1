@@ -7,7 +7,7 @@ void requestTransactionsFile(char *, wallet *, table *, table *);
 void findEarnings(char *, table *);
 char *uniqueID(char *);
 void findPayments(char *, table *);
-int checkFind(char *, char *, int *, int*, int *, int *, int *, int *, int*, int *);
+int checkFind(char *, char *, int *, int *, long int *, long int *);
 int checkInput(char *);
 void walletStatus(wallet *, char *);
 void bitCoinStatus(List *, int);

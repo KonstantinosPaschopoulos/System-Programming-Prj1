@@ -193,6 +193,7 @@ table* hash_init(int num_entries, int bucketSize){
   hash_table->size = num_entries;
   hash_table->bucket_size = bucketSize;
   strcpy(hash_table->greatestTransactionID, "");
+  hash_table->latestTransaction = 0;
 
   hash_table->h_table = (bucket**)malloc(num_entries * sizeof(bucket*));
   if (hash_table->h_table == NULL)
@@ -211,6 +212,7 @@ table* hash_init(int num_entries, int bucketSize){
 
 void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHashtable, table *receiverHashtable){
   int value, i;
+  long int epoch;
   char whole_line[250], senderWalletID[50], receiverWalletID[50];
   char array[9][55];
   char* token;
@@ -260,6 +262,11 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
     }
 
     enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
+
+    //Since the transactionsFile is sorted by time and date I change the time of the latest transaction
+    epoch = getUnixTime(info.year, info.month, info.day, info.hours, info.minutes);
+    senderHashtable->latestTransaction = epoch;
+    receiverHashtable->latestTransaction = epoch;
   }
 
   fclose(transactionsFile);
@@ -804,4 +811,20 @@ void addBitcointoWallet(wallet *walletList, char *wID, bitcoin_node *id, tree_no
 
     curr_wall = curr_wall->next;
   }
+}
+
+long int getUnixTime(int y, int mon, int d, int h, int min){
+  struct tm t;
+  time_t t_of_day;
+
+  t.tm_year = y - 1900;
+  t.tm_mon = mon - 1;
+  t.tm_mday = d;
+  t.tm_hour = h;
+  t.tm_min = min;
+  t.tm_sec = 0;
+  t.tm_isdst = -1;
+  t_of_day = mktime(&t);
+
+  return (long)t_of_day;
 }

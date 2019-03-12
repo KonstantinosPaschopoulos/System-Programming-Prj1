@@ -61,6 +61,7 @@ typedef struct table {
   int size;
   int bucket_size;
   char greatestTransactionID[50];  //Using this variable to store the currently greatest transactionID
+  long int latestTransaction;
   bucket **h_table;
 } table;
 

@@ -157,6 +157,7 @@ int requestTransaction(char *user_input, wallet *walletList, table *senderHashta
   //Generating a new unique transactionID
   temp = uniqueID(senderHashtable->greatestTransactionID);
   strcpy(info.transactionID, temp);
+  free(temp);
 
   //Adding the transaction to the system
   enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
@@ -173,8 +174,8 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
   int i;
   long int epoch;
   char array[8][55];
-  time_t t = time(NULL);
-  struct tm tm = *localtime(&t);
+  time_t t;
+  struct tm tm;
 
   //Calling requestTransaction to deal with the first transaction
   user_input[strlen(user_input) - 1] = '\0';
@@ -245,6 +246,9 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
     else if (i == 3)
     {
       //Use current the current time and date
+      t = time(NULL);
+      tm = *localtime(&t);
+
       info.day = tm.tm_mday;
       info.month = tm.tm_mon + 1;
       info.year = tm.tm_year + 1900;
@@ -281,6 +285,7 @@ void requestTransactions(char *user_input, wallet *walletList, table *senderHash
     //Generating a new unique transactionID
     temp = uniqueID(senderHashtable->greatestTransactionID);
     strcpy(info.transactionID, temp);
+    free(temp);
 
     //Adding the transaction to the system
     enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
@@ -297,8 +302,8 @@ void requestTransactionsFile(char *user_input, wallet *walletList, table *sender
   int i;
   long int epoch;
   char array[8][55];
-  time_t t = time(NULL);
-  struct tm tm = *localtime(&t);
+  time_t t;
+  struct tm tm;
 
   sscanf(user_input, "%s %s", command, input_file);
 
@@ -365,6 +370,9 @@ void requestTransactionsFile(char *user_input, wallet *walletList, table *sender
     else if (i == 3)
     {
       //Use current the current time and date
+      t = time(NULL);
+      tm = *localtime(&t);
+
       info.day = tm.tm_mday;
       info.month = tm.tm_mon + 1;
       info.year = tm.tm_year + 1900;
@@ -401,6 +409,7 @@ void requestTransactionsFile(char *user_input, wallet *walletList, table *sender
     //Generating a new unique transactionID
     temp = uniqueID(senderHashtable->greatestTransactionID);
     strcpy(info.transactionID, temp);
+    free(temp);
 
     //Adding the transaction to the system
     enterTransaction(info.sender, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
@@ -935,5 +944,138 @@ int checkInput(char *input){
 }
 
 void exitProgram(List *bitcoinList, wallet *walletList, table *senderHashtable, table *receiverHashtable){
+  int i, j;
+  bitcoin_node *currentBTC, *tmpBTC;
+  wallet_node *currentWallet, *tmpWallet;
+  leaf *currentLeaf, *tmpLeaf;
+  bucket *currentBucket, *tmpBucket;
+  transaction *currentTrans, *tmpTrans;
+  transaction *currentBTCTrans, *tmpBTCtrans;
 
+  //Freeing the list of bitCoins
+  currentBTC = bitcoinList->nodes;
+  while (currentBTC != NULL)
+  {
+    //Freeing the bitCoin trees
+    freeTree(currentBTC->tree);
+
+    //Freeing the bitCoin node
+    tmpBTC = currentBTC;
+    currentBTC = currentBTC->next;
+    free(tmpBTC);
+  }
+
+  //Freeing the list of wallets
+  currentWallet = walletList->nodes;
+  while (currentWallet != NULL)
+  {
+    //Freeing the list of bitCoins in every wallet
+    currentLeaf = currentWallet->bitcoins;
+    while (currentLeaf != NULL)
+    {
+      tmpLeaf = currentLeaf;
+      currentLeaf = currentLeaf->next;
+      free(tmpLeaf);
+    }
+
+    //Freeing the wallet node
+    tmpWallet = currentWallet;
+    currentWallet = currentWallet->next;
+    free(tmpWallet);
+  }
+
+  //Freeing the sender hash tables
+  for (i = 0; i < senderHashtable->size; i++)
+  {
+    currentBucket = senderHashtable->h_table[i];
+    while (currentBucket != NULL)
+    {
+      //Freeing all the transactions of each entry
+      for (j = 0; j < currentBucket->size; j++)
+      {
+        currentTrans = currentBucket->entries[j].transactions;
+        while (currentTrans != NULL)
+        {
+          //Freeing as many bitCoins where involved in the transaction
+          currentBTCTrans = currentTrans->next_bitcoin;
+          while (currentBTCTrans != NULL)
+          {
+            tmpBTCtrans = currentBTCTrans;
+            currentBTCTrans = currentBTCTrans->next_bitcoin;
+            free(tmpBTCtrans);
+          }
+
+          tmpTrans = currentTrans;
+          currentTrans = currentTrans->next;
+          free(tmpTrans);
+        }
+      }
+
+      //Freeing all the entries in every bucket
+      free(currentBucket->entries);
+
+      //Freeing the buckets and the overflow buckets
+      tmpBucket = currentBucket;
+      currentBucket = currentBucket->next;
+      free(tmpBucket);
+    }
+  }
+  free(senderHashtable->h_table);
+
+  for (i = 0; i < receiverHashtable->size; i++)
+  {
+    currentBucket = receiverHashtable->h_table[i];
+    while (currentBucket != NULL)
+    {
+      //Freeing all the transactions of each entry
+      for (j = 0; j < currentBucket->size; j++)
+      {
+        currentTrans = currentBucket->entries[j].transactions;
+        while (currentTrans != NULL)
+        {
+          //Freeing as many bitCoins where involved in the transaction
+          currentBTCTrans = currentTrans->next_bitcoin;
+          while (currentBTCTrans != NULL)
+          {
+            tmpBTCtrans = currentBTCTrans;
+            currentBTCTrans = currentBTCTrans->next_bitcoin;
+            free(tmpBTCtrans);
+          }
+
+          tmpTrans = currentTrans;
+          currentTrans = currentTrans->next;
+          free(tmpTrans);
+        }
+      }
+
+      //Freeing all the entries in every bucket
+      free(currentBucket->entries);
+
+      //Freeing the buckets and the overflow buckets
+      tmpBucket = currentBucket;
+      currentBucket = currentBucket->next;
+      free(tmpBucket);
+    }
+  }
+  free(receiverHashtable->h_table);
+
+
+
+  free(bitcoinList);
+  free(walletList);
+  free(senderHashtable);
+  free(receiverHashtable);
+}
+
+void freeTree(tree_node *tree){
+  //Using a recursive function to free the tree
+  if (tree == NULL)
+  {
+    return;
+  }
+
+  freeTree(tree->left);
+  freeTree(tree->right);
+
+  free(tree);
 }

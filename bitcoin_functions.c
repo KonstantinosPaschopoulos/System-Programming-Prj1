@@ -120,6 +120,8 @@ void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletLis
   }
   root->value = bitCoinValue;
   strcpy(root->walletID, walletID);
+  root->right = NULL;
+  root->left = NULL;
 
   newBTC->bitCoinID = id;
   newBTC->next = NULL;
@@ -273,6 +275,7 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
 }
 
 int checkTransactionID(char *transactionID, table *hash_t){
+  //TODO check other buckets not just first
   int i, j;
   bucket *buc;
   transaction *trans;
@@ -422,7 +425,10 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     for (i = 0; i < b->size; i++)
     {
       b->entries[i].empty = 1;
+      b->entries[i].transactions = NULL;
     }
+
+    b->next = NULL;
 
     //Entering the walletID in the first cell
     b->entries[0].empty = 0;
@@ -497,7 +503,10 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     for (i = 0; i < temp->size; i++)
     {
       temp->entries[i].empty = 1;
+      b->entries[i].transactions = NULL;
     }
+
+    temp->next = NULL;
 
     //Entering the walletID in the first cell
     temp->entries[0].empty = 0;
@@ -517,6 +526,13 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     exit(0);
   }
   trans->tree = NULL;
+  transa = (transaction*)malloc(sizeof(transaction));
+  if (transa == NULL)
+  {
+    perror("Malloc failed");
+    exit(0);
+  }
+  transa->tree = NULL;
 
   //Searching through the senders wallet to find enough balance
   curr_wall = walletList->nodes;
@@ -544,6 +560,8 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
           exit(0);
         }
         strcpy(new_balance->walletID, receiverWalletID);
+        new_balance->right = NULL;
+        new_balance->left = NULL;
         tree_node *rest = (tree_node*)malloc(sizeof(tree_node));
         if (rest == NULL)
         {
@@ -551,6 +569,9 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
           exit(0);
         }
         strcpy(rest->walletID, senderWalletID);
+        rest->right = NULL;
+        rest->left = NULL;
+
         if ((coin->balance->value - remainder) <= 0)
         {
           new_balance->value = coin->balance->value;
@@ -569,6 +590,7 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
         coin->balance->left->info = t_i;
         coin->balance->right = rest;
 
+        //The transaction for the sender
         if (trans->tree == NULL)
         {
           trans->tree = coin->balance->left;
@@ -580,6 +602,32 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
           //In the case that more than one bitcoin is needed
           //to complete the transfer
           curr_trans = trans;
+          while((curr_trans->next_bitcoin) != NULL)
+          {
+            curr_trans = curr_trans->next_bitcoin;
+          }
+
+          curr_trans->next_bitcoin = (transaction*)malloc(sizeof(transaction));
+          if (curr_trans->next_bitcoin == NULL)
+          {
+            perror("Malloc failed");
+            exit(0);
+          }
+          curr_trans->next_bitcoin->tree = coin->balance->left;
+          curr_trans->next_bitcoin->next_bitcoin = NULL;
+        }
+        //The transaction for the receiver
+        if (transa->tree == NULL)
+        {
+          transa->tree = coin->balance->left;
+          transa->next = NULL;
+          transa->next_bitcoin = NULL;
+        }
+        else
+        {
+          //In the case that more than one bitcoin is needed
+          //to complete the transfer
+          curr_trans = transa;
           while((curr_trans->next_bitcoin) != NULL)
           {
             curr_trans = curr_trans->next_bitcoin;
@@ -657,7 +705,10 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     for (i = 0; i < b->size; i++)
     {
       b->entries[i].empty = 1;
+      b->entries[i].transactions = NULL;
     }
+
+    b->next = NULL;
 
     //Entering the walletID in the first cell
     b->entries[0].empty = 0;
@@ -732,7 +783,10 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     for (i = 0; i < temp->size; i++)
     {
       temp->entries[i].empty = 1;
+      temp->entries[i].transactions = NULL;
     }
+
+    temp->next = NULL;
 
     //Entering the walletID in the first cell
     temp->entries[0].empty = 0;
@@ -744,18 +798,8 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     place = 0;
   }
 
-  // memcpy(transa, trans, sizeof);
-
   //Copying the contents of the transaction to a new transaction that's going to be added
   //to the receivers hash table
-  transa = (transaction*)malloc(sizeof(transaction));
-  if (transa == NULL)
-  {
-    perror("Malloc failed");
-    exit(0);
-  }
-
-  *transa = *trans;
 
   //Adding the new transaction to the bucket b at the place that was found, at the end of the list
   if (b->entries[place].transactions == NULL)

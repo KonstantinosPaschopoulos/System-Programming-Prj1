@@ -15,3 +15,4 @@ int countTransactions(tree_node *);
 void traceCoin(List *, int);
 void printTransactions(char *, tree_node *, int);
 void exitProgram(List *, wallet *, table *, table *);
+void freeTree(tree_node *);

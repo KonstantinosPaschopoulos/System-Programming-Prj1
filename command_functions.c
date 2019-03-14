@@ -1059,8 +1059,6 @@ void exitProgram(List *bitcoinList, wallet *walletList, table *senderHashtable, 
   }
   free(receiverHashtable->h_table);
 
-
-
   free(bitcoinList);
   free(walletList);
   free(senderHashtable);

@@ -291,8 +291,7 @@ int checkTransactionID(char *transactionID, table *hash_t){
   for (i = 0; i < hash_t->size; i++)
   {
     buc = hash_t->h_table[i];
-
-    if (buc != NULL)
+    while (buc != NULL)
     {
       for (j = 0; j < buc->size; j++)
       {
@@ -307,7 +306,28 @@ int checkTransactionID(char *transactionID, table *hash_t){
           trans = trans->next;
         }
       }
+
+      buc = buc->next;
     }
+
+
+
+    // if (buc != NULL)
+    // {
+    //   for (j = 0; j < buc->size; j++)
+    //   {
+    //     trans = buc->entries[j].transactions;
+    //     while (trans != NULL)
+    //     {
+    //       if (strcmp(transactionID, trans->tree->info.transactionID) == 0)
+    //       {
+    //         return 0;
+    //       }
+    //
+    //       trans = trans->next;
+    //     }
+    //   }
+    // }
   }
 
   return 1;

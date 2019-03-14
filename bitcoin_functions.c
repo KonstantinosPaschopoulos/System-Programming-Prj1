@@ -6,14 +6,14 @@
 
 int readBalances(FILE *bitCoinBalancesFile, List *bitcoinList, wallet *walletList, int bitCoinValue){
   int name;
-  char whole_line[250];
+  char whole_line[MAX_INPUT];
   char walletID[50];
   char * pch;
   wallet_node *curr_wallet = walletList->nodes;
   wallet_node *new_wallet;
 
   //Using fgets to read from the input until I reach the end of the file
-  while (fgets(whole_line, 250, bitCoinBalancesFile))
+  while (fgets(whole_line, MAX_INPUT, bitCoinBalancesFile))
   {
     if ((strlen(whole_line) > 0) && (whole_line[strlen(whole_line) - 1] == '\n'))
     {
@@ -221,14 +221,14 @@ table* hash_init(int num_entries, int bucketSize){
 int readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHashtable, table *receiverHashtable){
   int value, i;
   long int epoch;
-  char whole_line[250], senderWalletID[50], receiverWalletID[50];
+  char whole_line[MAX_INPUT], senderWalletID[50], receiverWalletID[50];
   char array[9][55];
   char* token;
   char delimiters[] = " -:";
   transaction_info info;
 
   //Using fgets to read from the input until I reach the end of the file
-  while (fgets(whole_line, 250, transactionsFile))
+  while (fgets(whole_line, MAX_INPUT, transactionsFile))
   {
     if ((strlen(whole_line) > 0) && (whole_line[strlen(whole_line) - 1] == '\n'))
     {
@@ -242,6 +242,13 @@ int readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHa
       {
         strcpy(array[i], token);
       }
+    }
+
+    //Making sure all the arguments are here
+    if (i != 9)
+    {
+      printf("Wrong arguments. Invalid transaction.\n");
+      continue;
     }
 
     //Assigning the correct value to each variable

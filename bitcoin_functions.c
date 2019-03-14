@@ -33,8 +33,7 @@ int readBalances(FILE *bitCoinBalancesFile, List *bitcoinList, wallet *walletLis
         name = 1;
         strcpy(walletID, pch);
 
-        //Every existing user must have a wallet
-        //even if they don't own any bitcoins
+        //Every existing user must have a wallet even if they don't own any bitcoins
         while (curr_wallet != NULL)
         {
           if (strcmp(curr_wallet->walletID, walletID) == 0)
@@ -191,6 +190,7 @@ int enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletList
 table* hash_init(int num_entries, int bucketSize){
   int i;
 
+  //Initialing the hash table and returning it
   table *hash_table = (table*)malloc(sizeof(table));
   if (hash_table == NULL)
   {
@@ -282,7 +282,6 @@ int readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHa
 }
 
 int checkTransactionID(char *transactionID, table *hash_t){
-  //TODO check other buckets not just first
   int i, j;
   bucket *buc;
   transaction *trans;
@@ -309,25 +308,6 @@ int checkTransactionID(char *transactionID, table *hash_t){
 
       buc = buc->next;
     }
-
-
-
-    // if (buc != NULL)
-    // {
-    //   for (j = 0; j < buc->size; j++)
-    //   {
-    //     trans = buc->entries[j].transactions;
-    //     while (trans != NULL)
-    //     {
-    //       if (strcmp(transactionID, trans->tree->info.transactionID) == 0)
-    //       {
-    //         return 0;
-    //       }
-    //
-    //       trans = trans->next;
-    //     }
-    //   }
-    // }
   }
 
   return 1;

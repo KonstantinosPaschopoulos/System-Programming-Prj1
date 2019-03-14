@@ -110,15 +110,23 @@ int main(int argc, char **argv){
   }
   walletList->nodes = NULL;
 
-  //Parsing the balances file
-  readBalances(bitCoinBalancesFile, bitcoinList, walletList, bitCoinValue);
-
   //After the balances have been read it's time to parse the transactions file
   table *senderHashtable = hash_init(senderHashtableNumOfEntries, bucketSize);
   table *receiverHashtable = hash_init(receiverHashtableNumOfEntries, bucketSize);
 
+  //Parsing the balances file
+  if (readBalances(bitCoinBalancesFile, bitcoinList, walletList, bitCoinValue) == -1)
+  {
+    exitProgram(bitcoinList, walletList, senderHashtable, receiverHashtable);
+    return 3;
+  }
+
   //Parsing the initial transactions
-  readTransactions(transactionsFile, walletList, senderHashtable, receiverHashtable);
+  if (readTransactions(transactionsFile, walletList, senderHashtable, receiverHashtable) == -1)
+  {
+    exitProgram(bitcoinList, walletList, senderHashtable, receiverHashtable);
+    return 3;
+  }
 
   //After all the data structures are set, the program is ready to get input from the user
   flag = 1;

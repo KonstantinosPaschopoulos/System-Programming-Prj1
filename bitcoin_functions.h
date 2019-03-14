@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "mytypes.h"
 
-void readBalances(FILE *, List *, wallet *, int);
-void enterBitcoin(int, List *, int, wallet *, char*);
+int readBalances(FILE *, List *, wallet *, int);
+int enterBitcoin(int, List *, int, wallet *, char*);
 table* hash_init(int, int);
-void readTransactions(FILE *, wallet *, table *, table *);
+int readTransactions(FILE *, wallet *, table *, table *);
 int checkTransactionID(char *, table *);
 int checkTransaction(wallet *, char *, char *, int);
 int hash_function(char *, int);

@@ -4,7 +4,7 @@
 #include "mytypes.h"
 #include "bitcoin_functions.h"
 
-void readBalances(FILE *bitCoinBalancesFile, List *bitcoinList, wallet *walletList, int bitCoinValue){
+int readBalances(FILE *bitCoinBalancesFile, List *bitcoinList, wallet *walletList, int bitCoinValue){
   int name;
   char whole_line[250];
   char walletID[50];
@@ -40,7 +40,7 @@ void readBalances(FILE *bitCoinBalancesFile, List *bitcoinList, wallet *walletLi
           if (strcmp(curr_wallet->walletID, walletID) == 0)
           {
             printf("Two users have the same userID, exiting\n");
-            exit(3);
+            return -1;
           }
 
           curr_wallet = curr_wallet->next;
@@ -77,7 +77,10 @@ void readBalances(FILE *bitCoinBalancesFile, List *bitcoinList, wallet *walletLi
       else
       {
         //Storing the bitcoin
-        enterBitcoin(atoi(pch), bitcoinList, bitCoinValue, walletList, walletID);
+        if (enterBitcoin(atoi(pch), bitcoinList, bitCoinValue, walletList, walletID) == -1)
+        {
+          return -1;
+        }
       }
 
       pch = strtok(NULL, " ");
@@ -85,9 +88,10 @@ void readBalances(FILE *bitCoinBalancesFile, List *bitcoinList, wallet *walletLi
   }
 
   fclose(bitCoinBalancesFile);
+  return 1;
 }
 
-void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletList, char *walletID){
+int enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletList, char *walletID){
   bitcoin_node *curr = bitcoinList->nodes;
   wallet_node *curr_wall = walletList->nodes;
   leaf *curr_leaf;
@@ -98,7 +102,7 @@ void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletLis
     if (curr->bitCoinID == id)
     {
       printf("Two users own the same bitcoin, exiting.\n");
-      exit(3);
+      return -1;
     }
 
     curr = curr->next;
@@ -180,6 +184,8 @@ void enterBitcoin(int id, List *bitcoinList, int bitCoinValue, wallet *walletLis
 
     curr_wall = curr_wall->next;
   }
+
+  return 1;
 }
 
 table* hash_init(int num_entries, int bucketSize){
@@ -212,7 +218,7 @@ table* hash_init(int num_entries, int bucketSize){
   return hash_table;
 }
 
-void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHashtable, table *receiverHashtable){
+int readTransactions(FILE *transactionsFile, wallet *walletList, table *senderHashtable, table *receiverHashtable){
   int value, i;
   long int epoch;
   char whole_line[250], senderWalletID[50], receiverWalletID[50];
@@ -258,9 +264,9 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
     }
     if (checkTransactionID(array[0], receiverHashtable) == 0)
     {
-      // TODO exit if found one duplicate transactionID
-      printf("The transactionID isn't unique. Invalid transaction.\n");
-      continue;
+      //Exit if found one duplicate transactionID
+      printf("The transactionID isn't unique, exiting.\n");
+      return -1;
     }
 
     enterTransaction(senderWalletID, senderHashtable, receiverWalletID, receiverHashtable, walletList, info);
@@ -272,6 +278,7 @@ void readTransactions(FILE *transactionsFile, wallet *walletList, table *senderH
   }
 
   fclose(transactionsFile);
+  return 1;
 }
 
 int checkTransactionID(char *transactionID, table *hash_t){
@@ -797,9 +804,6 @@ void enterTransaction(char *senderWalletID, table *senderHashtable, char *receiv
     b = prev->next;
     place = 0;
   }
-
-  //Copying the contents of the transaction to a new transaction that's going to be added
-  //to the receivers hash table
 
   //Adding the new transaction to the bucket b at the place that was found, at the end of the list
   if (b->entries[place].transactions == NULL)
